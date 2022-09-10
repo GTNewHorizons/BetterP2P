@@ -15,6 +15,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
 
     private val rowWidth = 254
     private val rowHeight = 32
+    public var renderNameTextField = true
 
     private var selectedInfo: InfoWrapper?
         get() = selectedInfoProperty.get()
@@ -43,7 +44,11 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
 
             fontRenderer.drawString(info.description, x + 24, y + 3, 0)
             fontRenderer.drawString(I18n.format("gui.advanced_memory_card.pos", info.posX, info.posY, info.posZ, info.facing.name), x + 24, y + 12, 0)
-            fontRenderer.drawString(I18n.format("gui.advanced_memory_card.name", info.name), x + 24, y + 21, 0)
+            if(renderNameTextField){
+                fontRenderer.drawString(I18n.format("gui.advanced_memory_card.name", info.name), x + 24, y + 21, 0)
+            }else{
+                fontRenderer.drawString(I18n.format("gui.advanced_memory_card.name", ""), x + 24, y + 21, 0)
+            }
 
             if (selectedInfo == null) {
                 info.bindButton.enabled = false
@@ -82,6 +87,10 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
     }
 
     private fun drawButtons(gui: GuiScreen, info: InfoWrapper, mouseX: Int, mouseY: Int, partialTicks: Float) {
+        info.renameButton.xPosition = x
+        info.renameButton.width = rowWidth
+        info.renameButton.yPosition = y
+        info.renameButton.height = rowHeight
         if (!info.bindButton.enabled && info.selectButton.enabled) {
             info.bindButton.enabled = false
             info.selectButton.enabled = true
