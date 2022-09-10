@@ -8,9 +8,9 @@ public class IGuiTextField extends MEGuiTextField {
     public void setVisible(boolean visible){
         this.field.setVisible(visible);
     }
-    public void setFocus(boolean focus){
+    public void setFocus(boolean focus,int position){
         this.field.setFocused(focus);
-        this.field.setCursorPosition(0);
+        this.field.setCursorPosition(position);
     }
     public IGuiTextField(final int width, final int height, final String tooltip){
         super(width,height,tooltip);
@@ -25,5 +25,9 @@ public class IGuiTextField extends MEGuiTextField {
     }
     public InfoWrapper getInfo(){
         return info;
+    }
+
+    public void setFocus(boolean focus) {
+        this.field.setFocused(focus);
     }
 }

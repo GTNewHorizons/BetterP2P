@@ -177,6 +177,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             descriptionLines.clear()
         }
         drawInformation()
+        if(renameBar.isVisible && !renameBar.isFocused) renameBar.setFocus(true)
         renameBar.drawTextBox()
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
@@ -225,10 +226,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         renameBar.isVisible = true
         renameBar.y = (this.guiTop + 6) + (index + 1) * 33
         renameBar.x = this.guiLeft + 60
-        renameBar.w = 80
+        renameBar.w = 120
         renameBar.h = 12
         renameBar.text = info.name
-        renameBar.setFocus(true)
+        renameBar.setFocus(true,0)
         renameBar.info = info
     }
 
