@@ -321,7 +321,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             }else{
                 renameBar.textboxKeyTyped(char, key)
             }
-        }else if (searchBar.isFocused && !(char == ' ' && searchBar.text.isEmpty())){
+        }else if (searchBar.isFocused && !(char.isWhitespace() && searchBar.text.isEmpty())){
             searchBar.textboxKeyTyped(char, key)
             infos.refilter()
         }
