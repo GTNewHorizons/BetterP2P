@@ -13,9 +13,10 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.common.util.ForgeDirection
 
-fun linkP2P(player: EntityPlayer, inputIndex: Int, outputIndex: Int, status: P2PStatus) : Pair<PartP2PTunnel<*>, PartP2PTunnel<*>>? {
-    val input = status.listP2P[inputIndex]
-    val output = status.listP2P[outputIndex]
+fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P2PStatus) : Pair<PartP2PTunnel<*>, PartP2PTunnel<*>>? {
+    // If these calls mess up we have bigger problems...
+    val input = status.listP2P[inputIndex]!!
+    val output = status.listP2P[outputIndex]!!
 
     val grid: IGrid? = input.gridNode?.grid
     if (grid is ISecurityGrid) {
@@ -59,7 +60,7 @@ fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, player
 
     val data = NBTTagCompound()
     val p2pItem: ItemStack = tunnel.getItemStack(PartItemStack.Wrench)
-    p2pItem.unlocalizedName
+//    p2pItem.unlocalizedName
     tunnel.outputProperty = output
     tunnel.customName = name
 
@@ -96,5 +97,5 @@ var PartP2PTunnel<*>.outputProperty
 val PartP2PTunnel<*>.hasChannel
     get() = isPowered && isActive
 
-fun PartP2PTunnel<*>.getInfo(index: Int)
-    = P2PInfo(index, frequency, location.x, location.y, location.z, location.dimension, side, customName, isOutput, hasChannel)
+fun PartP2PTunnel<*>.toInfo()
+    = P2PInfo(frequency, location.x, location.y, location.z, location.dimension, side, customName, isOutput, hasChannel)

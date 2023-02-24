@@ -1,6 +1,7 @@
 package com.projecturanus.betterp2p.client.gui
 
 import com.projecturanus.betterp2p.network.P2PInfo
+import com.projecturanus.betterp2p.network.hashP2P
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.resources.I18n
 import net.minecraftforge.common.util.ForgeDirection
@@ -8,13 +9,15 @@ import java.util.*
 
 class InfoWrapper(info: P2PInfo) {
     // Basic information
-    val index: Int = info.index
+    val code: Long by lazy {
+        hashP2P(posX, posY, posZ, facing.ordinal, dim)
+    }
     val frequency: Long = info.frequency
     val hasChannel = info.hasChannel
     val posX: Int = info.posX
     val posY: Int = info.posY
     val posZ: Int = info.posZ
-    val world: Int = info.world
+    val dim: Int = info.world
     val facing: ForgeDirection = info.facing
     val description: String
     val output: Boolean = info.output
@@ -40,8 +43,20 @@ class InfoWrapper(info: P2PInfo) {
         }
     }
 
-    override fun toString() : String {
-        return "${posX}_${posY}_${posZ}_${world}_${facing}"
+    override fun hashCode(): Int {
+        return code.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return if (other is InfoWrapper) {
+            this.posX == other.posX &&
+            this.posY == other.posY &&
+            this.posZ == other.posZ &&
+            this.dim == other.dim &&
+            this.facing == other.facing
+        } else {
+            false
+        }
     }
 }
 

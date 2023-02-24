@@ -3,14 +3,14 @@ package com.projecturanus.betterp2p.network
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
 
-class C2SLinkP2P(var input: Int = -1, var output: Int = -1): IMessage {
+class C2SLinkP2P(var input: Long = NONE, var output: Long = NONE): IMessage {
     override fun fromBytes(buf: ByteBuf) {
-        input = buf.readInt()
-        output = buf.readInt()
+        input = buf.readLong()
+        output = buf.readLong()
     }
 
     override fun toBytes(buf: ByteBuf) {
-        buf.writeInt(input)
-        buf.writeInt(output)
+        buf.writeLong(input)
+        buf.writeLong(output)
     }
 }

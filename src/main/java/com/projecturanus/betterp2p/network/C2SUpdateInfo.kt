@@ -6,13 +6,13 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
 
 fun writeMemoryInfo(buf: ByteBuf, info: MemoryInfo) {
-    buf.writeInt(info.selectedIndex)
+    buf.writeLong(info.selectedEntry)
     buf.writeLong(info.frequency)
     buf.writeInt(info.mode.ordinal)
 }
 
 fun readMemoryInfo(buf: ByteBuf): MemoryInfo {
-    return MemoryInfo(buf.readInt(), buf.readLong(), BetterMemoryCardModes.values()[buf.readInt()])
+    return MemoryInfo(buf.readLong(), buf.readLong(), BetterMemoryCardModes.values()[buf.readInt()])
 }
 
 class C2SUpdateInfo(var info: MemoryInfo = MemoryInfo()) : IMessage {
