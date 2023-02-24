@@ -31,6 +31,8 @@ class InfoList (initList: Collection<InfoWrapper>,
      */
     var filtered: List<InfoWrapper> = listOf()
 
+    private val filter: InfoFilter = InfoFilter()
+
     /**
      * Binding to the search string in the text box
      */
@@ -69,12 +71,24 @@ class InfoList (initList: Collection<InfoWrapper>,
      * Updates the filtered list.
      */
     fun refilter() {
+        filter.updateFilter(searchStr.lowercase())
         filtered = sorted.filter {
-            it.frequency.toHexString().contains(searchStr.uppercase()) ||
-                it.frequency.toHexString().format4().contains(searchStr.uppercase()) ||
-                it.name.lowercase().contains(searchStr.lowercase()) ||
-                it.code == selectedEntry
+            if (it.code == selectedEntry) {
+                return@filter true
+            }
+            for ((f, strs) in filter.activeFilters) {
+                if(!f.filter(it, strs?.toList())) {
+                    return@filter false
+                }
+            }
+            true
         }
+//        filtered = sorted.filter {
+//            it.frequency.toHexString().contains(searchStr.uppercase()) ||
+//                it.frequency.toHexString().format4().contains(searchStr.uppercase()) ||
+//                it.name.lowercase().contains(searchStr.lowercase()) ||
+//                it.code == selectedEntry
+//        }
     }
 
     /**
