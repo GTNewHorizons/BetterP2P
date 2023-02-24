@@ -4,7 +4,7 @@ import appeng.api.parts.IPartHost
 import appeng.parts.p2p.PartP2PTunnel
 import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard
 import com.projecturanus.betterp2p.util.p2p.P2PStatus
-import com.projecturanus.betterp2p.util.p2p.getInfo
+import com.projecturanus.betterp2p.util.p2p.toInfo
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
 import cpw.mods.fml.common.network.simpleimpl.MessageContext
@@ -22,7 +22,7 @@ class ServerRenameP2PTunnel : IMessageHandler<C2SP2PTunnelInfo, IMessage?> {
             val p = (te as IPartHost).getPart(ForgeDirection.getOrientation(message.info.side)) as  PartP2PTunnel<*>
             p.customName = message.info.name
             ModNetwork.channel.sendTo(S2CListP2P(
-                P2PStatus(player, 0, p.gridNode.grid,p).listP2P.mapIndexed { index, p2p -> p2p.getInfo(index) },
+                P2PStatus(player, p.gridNode.grid,p).listP2P.values.map { it.toInfo() },
                 ItemAdvancedMemoryCard.getInfo(player.heldItem)
             ),player)
         }

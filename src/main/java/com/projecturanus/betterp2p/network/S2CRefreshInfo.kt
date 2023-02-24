@@ -5,7 +5,6 @@ import io.netty.buffer.ByteBuf
 import net.minecraftforge.common.util.ForgeDirection
 
 fun readInfo(buf: ByteBuf): P2PInfo {
-    val index = buf.readInt()
     val freq = buf.readLong()
     val posX = buf.readInt()
     val posY = buf.readInt()
@@ -17,11 +16,10 @@ fun readInfo(buf: ByteBuf): P2PInfo {
     for (i in 0..nameLength) {
         name += buf.readChar()
     }
-    return P2PInfo(index, freq, posX, posY, posZ,world, facing, name, buf.readBoolean(), buf.readBoolean())
+    return P2PInfo(freq, posX, posY, posZ,world, facing, name, buf.readBoolean(), buf.readBoolean())
 }
 
 fun writeInfo(buf: ByteBuf, info: P2PInfo) {
-    buf.writeInt(info.index)
     buf.writeLong(info.frequency)
     buf.writeInt(info.posX)
     buf.writeInt(info.posY)

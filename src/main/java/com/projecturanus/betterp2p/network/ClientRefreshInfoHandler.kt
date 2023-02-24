@@ -13,7 +13,7 @@ class ClientRefreshInfoHandler : IMessageHandler<S2CRefreshInfo, IMessage?> {
     override fun onMessage(message: S2CRefreshInfo, ctx: MessageContext): IMessage? {
         val gui = Minecraft.getMinecraft().currentScreen
         if (gui is GuiAdvancedMemoryCard) {
-            gui.refreshInfo(message.infos, true)
+            gui.refreshInfo(message.infos)
         }
         return null
     }
