@@ -1,7 +1,7 @@
 // Add your dependencies here
 
 dependencies {
-    compile 'com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-104-GTNH:dev'
+    compile 'com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-160-GTNH:dev'
     compile 'com.github.GTNewHorizons:Forgelin:1.9.2-GTNH-1.7.10-Edition'
     compile 'com.github.GTNewHorizons:BuildCraft:7.1.27:dev'
 }
