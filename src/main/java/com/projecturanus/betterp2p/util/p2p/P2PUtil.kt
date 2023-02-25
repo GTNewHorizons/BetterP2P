@@ -5,8 +5,13 @@ import appeng.api.networking.IGrid
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
+import appeng.helpers.DualityInterface
 import appeng.me.GridAccessException
+import appeng.parts.automation.UpgradeInventory
+import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PTunnel
+import appeng.tile.inventory.AppEngInternalInventory
+import appeng.util.Platform
 import com.projecturanus.betterp2p.network.P2PInfo
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
@@ -37,17 +42,58 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     var frequency = input.frequency
     val cache = input.proxy.p2P
     // TODO reduce changes
-    if (input.frequency.toInt() == 0 || input.isOutput) {
+    if (input.frequency == 0L || input.isOutput) {
         frequency = System.currentTimeMillis()
-        updateP2P(input, frequency, false, player, input.customName)
     }
+    // If tunnel was already bound, unbind that one.
     if (cache.getInput(frequency) != null) {
         val originalInput = cache.getInput(frequency)
-        if (originalInput != input)
+        if (originalInput != input) {
             updateP2P(originalInput, frequency, true, player, input.customName)
+        }
     }
+    val inputResult: PartP2PTunnel<*> = updateP2P(input, frequency, false, player, input.customName)
+    val outputResult: PartP2PTunnel<*> = updateP2P(output, frequency, true, player, input.customName)
+    if (input is PartP2PInterface && output is PartP2PInterface) {
+        // For input and output, retain upgrades, items, and settings.
+        inputResult as PartP2PInterface; outputResult as PartP2PInterface
+        val upgradesIn = input.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
+        upgradesIn.forEachIndexed { index, stack ->
+            (inputResult.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
+        }
+        val upgradesOut = output.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
+        upgradesOut.forEachIndexed { index, stack ->
+            (outputResult.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
+        }
+        val itemsIn = input.interfaceDuality.storage as AppEngInternalInventory
+        itemsIn.forEachIndexed { index, stack ->
+            (inputResult.interfaceDuality.storage as AppEngInternalInventory).setInventorySlotContents(index, stack)
+        }
+        val itemsOut = output.interfaceDuality.storage as AppEngInternalInventory
+        itemsOut.forEachIndexed { index, stack ->
+            (outputResult.interfaceDuality.storage as AppEngInternalInventory).setInventorySlotContents(index, stack)
+        }
+        val settingsIn = input.interfaceDuality.configManager
+        settingsIn.settings.forEach {
+            inputResult.configManager.putSetting(it, settingsIn.getSetting(it))
+        }
+        val settingsOut = output.interfaceDuality.configManager
+        settingsOut.settings.forEach {
+            outputResult.configManager.putSetting(it, settingsOut.getSetting(it))
+        }
 
-    return updateP2P(input, frequency, false, player, input.customName) to updateP2P(output, frequency, true, player, input.customName)
+        // For input, just copy the patterns over.
+        val patternsIn = input.interfaceDuality.patterns as AppEngInternalInventory
+        patternsIn.forEachIndexed { index, stack ->
+            (inputResult.interfaceDuality.patterns as AppEngInternalInventory).setInventorySlotContents(index, stack)
+        }
+        // For output, drop items.
+        val dropItems = mutableListOf<ItemStack>()
+        val patternsOut = output.interfaceDuality.patterns as AppEngInternalInventory
+        dropItems.addAll(patternsOut)
+        Platform.spawnDrops(player.worldObj, output.location.x, output.location.y, output.location.z, dropItems)
+    }
+    return inputResult to outputResult
 }
 
 /**
@@ -55,12 +101,12 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
  */
 fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, player: EntityPlayer, name: String): PartP2PTunnel<*> {
     val side = tunnel.side
+    val data = NBTTagCompound()
 
     tunnel.host.removePart(side, true)
 
-    val data = NBTTagCompound()
     val p2pItem: ItemStack = tunnel.getItemStack(PartItemStack.Wrench)
-//    p2pItem.unlocalizedName
+
     tunnel.outputProperty = output
     tunnel.customName = name
 
@@ -70,7 +116,6 @@ fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, player
     val newType = ItemStack.loadItemStackFromNBT(data)
     val dir: ForgeDirection = tunnel.host?.addPart(newType, side, player) ?: throw RuntimeException("Cannot bind")
     val newBus: IPart = tunnel.host.getPart(dir)
-
     if (newBus is PartP2PTunnel<*>) {
         newBus.outputProperty = output
         try {
