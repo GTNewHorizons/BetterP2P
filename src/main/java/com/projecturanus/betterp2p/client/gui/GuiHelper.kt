@@ -3,10 +3,6 @@ package com.projecturanus.betterp2p.client.gui
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.ResourceLocation
 
-fun bindTexture(loc: ResourceLocation) {
-
-}
-
 /**
  * Draws a textured quad.
  *

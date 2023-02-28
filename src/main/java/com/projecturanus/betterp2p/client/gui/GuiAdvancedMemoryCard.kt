@@ -7,6 +7,7 @@ import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.TextureBound
 import com.projecturanus.betterp2p.client.gui.widget.*
 import com.projecturanus.betterp2p.network.*
+import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator
@@ -14,6 +15,7 @@ import net.minecraft.client.resources.I18n
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
+import org.lwjgl.opengl.GL11
 import java.util.*
 
 const val GUI_WIDTH = 288
@@ -72,6 +74,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         )
     }
 
+    val BACKGROUND: ResourceLocation = ResourceLocation(MODID, "textures/gui/advanced_memory_card.png")
     private val selectedInfo: InfoWrapper?
         get() = infos.selectedInfo
 
@@ -106,13 +109,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             scale = GuiScale.DYNAMIC
         }
         val numEntries = scale.size(height - 75)
-        ySize = (numEntries * P2P_ENTRY_HEIGHT) + 75 + (numEntries - 1)
+        ySize = (numEntries * P2PEntryConstants.HEIGHT) + 75 + (numEntries - 1)
         guiTop = (h - ySize) / 2
         guiLeft = (width - GUI_WIDTH) / 2
 
         scrollBar.displayX = guiLeft + 268
         scrollBar.displayY = guiTop + 19
-        scrollBar.height = numEntries * P2P_ENTRY_HEIGHT + (numEntries - 1) - 7
+        scrollBar.height = numEntries * P2PEntryConstants.HEIGHT + (numEntries - 1) - 7
         scrollBar.setRange(0, infos.size.coerceIn(0, (infos.size - numEntries).coerceAtLeast(0)), 23)
 
         searchBar.setMaxStringLength(40)
@@ -170,11 +173,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         drawDefaultBackground()
         drawBackground()
-        scrollBar.draw(this)
-        searchBar.drawTextBox()
-        col.render(this, mouseX, mouseY, partialTicks)
-        modeButton.drawButton(mc, mouseX, mouseY)
-        resizeButton.draw(mc, mouseX, mouseY, partialTicks)
+        // Draw the stuff that resets GL state first
         fontRendererObj.drawString(I18n.format("item.advanced_memory_card.name"), guiLeft + tableX, guiTop + 6, 0)
         if (modeButton.func_146115_a()) {
             descriptionLines.clear()
@@ -183,10 +182,26 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             descriptionLines.clear()
         }
         drawInformation()
+        searchBar.drawTextBox()
+        resizeButton.draw(mc, mouseX, mouseY, partialTicks)
+        modeButton.drawButton(mc, mouseX, mouseY)
+
+        // Now do our drawing
+        GL11.glPushAttrib(GL11.GL_BLEND or GL11.GL_TEXTURE_2D or GL11.GL_COLOR)
+        GL11.glEnable(GL11.GL_BLEND)
+        GL11.glEnable(GL11.GL_TEXTURE_2D)
+        GL11.glColor3f(255f, 255f, 255f)
+        scrollBar.draw(this)
+
+        col.render(this, mouseX, mouseY, partialTicks)
+        // The GL state is already messed up here by string drawing but oh well
+        GL11.glPopAttrib()
         if (searchBar.isMouseIn(mouseX, mouseY)) {
             drawHoveringText(sortRules, guiLeft, guiTop + ySize - 40, fontRendererObj)
         } else if (resizeButton.isHovering(mouseX, mouseY)) {
             drawHoveringText(listOf(I18n.format(resizeButton.hoverText())), mouseX, mouseY, fontRendererObj)
+        } else {
+            col.mouseHovered(mouseX, mouseY)
         }
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
@@ -230,6 +245,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         col.mouseClicked(mouseX, mouseY, mouseButton)
         if (modeButton.mousePressed(mc, mouseX, mouseY)) {
             switchMode()
+            modeButton.func_146113_a(mc.soundHandler)
         }
         scrollBar.click(mouseX, mouseY)
         resizeButton.mousePressed(mouseX, mouseY)
@@ -254,8 +270,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         super.handleMouseInput()
         val i = Mouse.getEventDWheel()
         if (i != 0 && isShiftKeyDown()) {
-            val x = Mouse.getEventX() * width / mc.displayWidth
-            val y = height - Mouse.getEventY() * height / mc.displayHeight - 1
+//            val x = Mouse.getEventX() * width / mc.displayWidth
+//            val y = height - Mouse.getEventY() * height / mc.displayHeight - 1
 //            this.mouseWheelEvent(x, y, i / Math.abs(i))
         } else if (i != 0) {
             scrollBar.wheel(i)
@@ -268,8 +284,12 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         mc.textureManager.bindTexture(loc)
     }
 
+    fun bindTexture(loc: ResourceLocation) {
+        mc.textureManager.bindTexture(loc)
+    }
+
     private fun drawBackground() {
-        bindTexture(MODID, "textures/gui/advanced_memory_card.png")
+        bindTexture(BACKGROUND)
         val tessellator = Tessellator.instance
         // Draw the top part
         drawTexturedQuad(tessellator, guiLeft.toDouble(), guiTop.toDouble(),
@@ -277,7 +297,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             u0 = 0.0, v0 = 0.0,
             u1 = 1.0, v1 = 60.0 / GUI_TEX_HEIGHT)
         // Draw P2P segments
-        val p2pHeight = P2P_ENTRY_HEIGHT + 1.0
+        val p2pHeight = P2PEntryConstants.HEIGHT + 1.0
         for (i in 0 until scale.size(ySize - 75) - 2) {
             drawTexturedQuad(tessellator, guiLeft.toDouble(), guiTop + 60.0 + p2pHeight * i,
                 (guiLeft + GUI_WIDTH).toDouble(), guiTop + 60.0 + p2pHeight * (i + 1),
@@ -296,10 +316,18 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     override fun keyTyped(char: Char, key: Int) {
-        if(key == Keyboard.KEY_LSHIFT) return
-        if (!col.keyTyped(char, key) && !(char.isWhitespace() && searchBar.text.isEmpty()) && searchBar.textboxKeyTyped(char, key)){
+        if (key == Keyboard.KEY_LSHIFT || col.keyTyped(char, key)) return
+        if (!(char.isWhitespace() && searchBar.text.isEmpty()) && searchBar.textboxKeyTyped(char, key)){
             infos.refilter()
+        } else if (char == 'e') {
+            mc.displayGuiScreen(null as GuiScreen?)
+            mc.setIngameFocus()
+            return
         }
         return super.keyTyped(char, key)
+    }
+
+    public override fun drawHoveringText(textLines: List<Any?>?, x: Int, y: Int, font: FontRenderer?) {
+        super.drawHoveringText(textLines, x, y, font)
     }
 }

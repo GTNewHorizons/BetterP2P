@@ -29,7 +29,7 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
 
     fun draw(mc: Minecraft?, mouseX: Int, mouseY: Int, partialTicks: Float) {
         val tessellator = Tessellator.instance
-        gui.bindTexture(MODID, "textures/gui/advanced_memory_card.png")
+        gui.bindTexture(gui.BACKGROUND)
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
         field_146123_n = mouseX >= xPosition && mouseY >= yPosition && mouseX < xPosition + width && mouseY < yPosition + height
         val k = getHoverState(field_146123_n)
