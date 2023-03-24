@@ -1,11 +1,17 @@
 package com.projecturanus.betterp2p.client.gui
 
+import appeng.api.parts.PartItemStack
+import appeng.me.GridNode
+import appeng.parts.p2p.PartP2PTunnel
+import appeng.parts.p2p.PartP2PTunnelME
+import appeng.tile.networking.TileCableBus
 import com.projecturanus.betterp2p.network.P2PInfo
 import com.projecturanus.betterp2p.network.hashP2P
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.resources.I18n
+import net.minecraft.util.IIcon
+import net.minecraftforge.common.DimensionManager
 import net.minecraftforge.common.util.ForgeDirection
-import java.util.*
 
 class InfoWrapper(info: P2PInfo) {
     // Basic information
@@ -19,29 +25,81 @@ class InfoWrapper(info: P2PInfo) {
     val posZ: Int = info.posZ
     val dim: Int = info.world
     val facing: ForgeDirection = info.facing
-    val description: String
     val output: Boolean = info.output
-    var name: String = info.name
-    var error: Boolean = false
+    val tile: TileCableBus? by lazy {
+        DimensionManager.getWorld(dim)?.getTileEntity(posX, posY, posZ) as? TileCableBus
+    }
 
-    // Widgets
-    val selectButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.select"))
-    val bindButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.bind"))
-    val renameButton = GuiButton(0, 0, 0, 0, 0,"")
-    init {
-        description = buildString {
-            append("P2P ")
+    val icon: IIcon? by lazy {
+        (tile?.getPart(info.facing) as? PartP2PTunnel<*>)?.typeTexture
+    }
+    val overlay: IIcon? by lazy {
+        tile?.getPart(info.facing)?.getItemStack(PartItemStack.Wrench)?.iconIndex
+    }
+
+    val typeName: String by lazy {
+        val item = tile?.getPart(info.facing)?.getItemStack(PartItemStack.Wrench)
+        I18n.format(item?.getItem()?.getItemStackDisplayName(item)?.split(" - ")?.getOrNull(1)
+            ?: "§c<Something broke...>")
+    }
+
+    val description: String by lazy {
+        buildString {
+            append("Type: ")
+            append(typeName)
+            append(" - ")
             if (output)
                 append(I18n.format("gui.advanced_memory_card.desc.mode.output"))
             else
                 append(I18n.format("gui.advanced_memory_card.desc.mode.input"))
-            append(" - ")
-            if (info.frequency.toInt() == 0)
-                append(I18n.format("gui.advanced_memory_card.desc.not_set"))
-            else
-                append(info.frequency.toHexString().format4())
         }
     }
+    val freqDisplay: String by lazy {
+        buildString {
+            append(I18n.format("item.advanced_memory_card.selected"))
+            append(" ")
+            if (frequency != 0L) {
+                val hex: String = buildString {
+                    append((frequency shr 32).toUInt().toString(16).uppercase())
+                    append(frequency.toUInt().toString(16).uppercase())
+                }.format4()
+                append(hex)
+            } else {
+                append(I18n.format("gui.advanced_memory_card.desc.not_set"))
+            }
+        }
+    }
+
+    val hoverInfo: List<String>  by lazy {
+        val online = (tile?.getPart(info.facing) as? PartP2PTunnel<*>)?.proxy?.isPowered
+        val list = mutableListOf(
+            "§b$typeName§r",
+            "§e" + I18n.format("gui.advanced_memory_card.pos", info.posX, info.posY, info.posZ),
+            "§e" + I18n.format("gui.advanced_memory_card.side", info.facing.name),
+            "§e" + I18n.format("gui.advanced_memory_card.dim", info.world)
+        )
+        if (error || frequency == 0L) {
+            list.add("§c" + I18n.format("gui.advanced_memory_card.p2p_status.unbound"))
+        } else {
+            list.add("§a" + I18n.format("gui.advanced_memory_card.p2p_status.bound"))
+        }
+        if (online != true) list.add("§c" + I18n.format("gui.advanced_memory_card.p2p_status.offline"))
+        list
+    }
+
+    val channels: String? by lazy {
+        val c = ((tile?.getPart(facing) as? PartP2PTunnelME)?.externalFacingNode as? GridNode)?.usedChannels()
+        if (c != null) {
+            I18n.format("gui.advanced_memory_card.extra.channel", c)
+        } else null
+    }
+
+    var name: String = info.name
+    var error: Boolean = false
+
+    // Widgets
+    val bindButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.bind"))
+    val renameButton = GuiButton(0, 0, 0, 0, 0,"")
 
     override fun hashCode(): Int {
         return code.hashCode()
@@ -60,23 +118,13 @@ class InfoWrapper(info: P2PInfo) {
     }
 }
 
-fun Long.toHexString(): String {
-    var tmp = this
-    var hex = String()
-    while (tmp != 0.toLong()) {
-        hex += Integer.toHexString((tmp % 16).toInt())
-        tmp /= 16
-    }
-    return hex.uppercase(Locale.getDefault()).reversed()
-}
-
 fun String.format4(): String {
-    var format = String()
+    val format = StringBuilder()
     for (index in this.indices) {
         if (index % 4 == 0 && index != 0) {
-            format += " "
+            format.append(" ")
         }
-        format += this[index]
+        format.append(this[index])
     }
-    return format
+    return format.toString()
 }
