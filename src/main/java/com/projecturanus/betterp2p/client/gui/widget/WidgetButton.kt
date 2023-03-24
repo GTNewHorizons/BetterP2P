@@ -34,8 +34,7 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
         field_146123_n = mouseX >= xPosition && mouseY >= yPosition && mouseX < xPosition + width && mouseY < yPosition + height
         val k = getHoverState(field_146123_n)
         GL11.glEnable(GL11.GL_BLEND)
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0)
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
+        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0)
         // Draw button backdrop
         drawTexturedQuad(tessellator, xPosition.toDouble(), yPosition.toDouble(),
             (xPosition + width).toDouble(), (yPosition + height).toDouble(),
