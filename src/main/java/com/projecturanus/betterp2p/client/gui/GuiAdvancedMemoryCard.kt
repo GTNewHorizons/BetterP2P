@@ -238,7 +238,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             ClientCache.selectedFacing = selectedInfo?.facing
         }
         ClientCache.positions.clear()
-        ClientCache.positions.addAll(infos.sorted.filter { it.frequency == selectedInfo?.frequency && it != selectedInfo }.map { arrayListOf(it.posX, it.posY, it.posZ) to it.facing })
+        ClientCache.positions.addAll(infos.sorted.filter {
+            it.frequency == selectedInfo?.frequency &&
+            it != selectedInfo &&
+            it.dim == mc.thePlayer.dimension
+        }.map { arrayListOf(it.posX, it.posY, it.posZ) to it.facing })
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {

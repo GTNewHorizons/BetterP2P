@@ -1,6 +1,7 @@
 package com.projecturanus.betterp2p.network
 
 import com.projecturanus.betterp2p.client.gui.InfoWrapper
+import net.minecraft.item.ItemStack
 import net.minecraftforge.common.util.ForgeDirection
 
 class P2PInfo(val frequency: Long,
@@ -11,7 +12,9 @@ class P2PInfo(val frequency: Long,
               val facing: ForgeDirection,
               val name: String,
               val output: Boolean,
-              val hasChannel: Boolean) {
+              val hasChannel: Boolean,
+              val channels: Int, //# of channels if ME P2P, or -1 else
+              val stack: ItemStack) {
 
     override fun hashCode(): Int {
         return hashP2P(posX, posY, posZ, facing.ordinal, world).hashCode()
