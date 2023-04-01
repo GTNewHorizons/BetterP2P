@@ -7,6 +7,7 @@ import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
 import appeng.helpers.DualityInterface
 import appeng.me.GridAccessException
+import appeng.me.GridNode
 import appeng.parts.automation.UpgradeInventory
 import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PTunnel
@@ -143,4 +144,6 @@ val PartP2PTunnel<*>.hasChannel
     get() = isPowered && isActive
 
 fun PartP2PTunnel<*>.toInfo()
-    = P2PInfo(frequency, location.x, location.y, location.z, location.dimension, side, customName, isOutput, hasChannel)
+    = P2PInfo(frequency, location.x, location.y, location.z, location.dimension, side,
+              customName, isOutput, hasChannel, (externalFacingNode as? GridNode)?.usedChannels() ?: -1,
+              getItemStack(PartItemStack.Wrench))
