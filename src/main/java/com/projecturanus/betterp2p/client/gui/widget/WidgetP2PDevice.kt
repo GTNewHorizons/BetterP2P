@@ -20,6 +20,10 @@ object P2PEntryConstants {
     const val LEFT_ALIGN = 24
 }
 
+val typeIcons: List<IIcon> = listOf(
+
+)
+
 class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>, val modeSupplier: () -> BetterMemoryCardModes, val infoSupplier: () -> InfoWrapper?, var x: Int, var y: Int): Widget() {
 
     var renderNameTextField = true
@@ -45,7 +49,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
             }
             GL11.glColor3f(255f, 255f, 255f)
             // Draw our icons...
-            drawIcon(gui, info.icon!!, info.overlay!!, x + 3, y + 3)
+            drawIcon(gui, info.icon, info.overlay, x + 3, y + 3)
             gui.bindTexture(gui.BACKGROUND)
             if (info.output) {
                 drawTexturedQuad(Tessellator.instance, x.toDouble(), y + 4.0, x + 16.0, y + 20.0,

@@ -2,19 +2,13 @@ package com.projecturanus.betterp2p.client.gui
 
 import appeng.api.parts.IPart
 import appeng.api.parts.IPartItem
-import appeng.api.parts.PartItemStack
-import appeng.me.GridNode
 import appeng.parts.p2p.PartP2PTunnel
-import appeng.parts.p2p.PartP2PTunnelME
-import appeng.tile.networking.TileCableBus
 import com.projecturanus.betterp2p.network.P2PInfo
 import com.projecturanus.betterp2p.network.hashP2P
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.resources.I18n
 import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
 import net.minecraft.util.IIcon
-import net.minecraftforge.common.DimensionManager
 import net.minecraftforge.common.util.ForgeDirection
 
 class InfoWrapper(info: P2PInfo) {
@@ -53,7 +47,7 @@ class InfoWrapper(info: P2PInfo) {
         }
     }
 
-    val hoverInfo: List<String>
+    val hoverInfo: MutableList<String>
 
     val channels: String? by lazy {
         if (info.channels >= 0) {
@@ -65,6 +59,14 @@ class InfoWrapper(info: P2PInfo) {
 
     var name: String = info.name
     var error: Boolean = false
+        set(value) {
+            if (value) {
+                hoverInfo[4] = "§c" + I18n.format("gui.advanced_memory_card.p2p_status.unbound")
+            } else {
+                hoverInfo[4] = "§a" + I18n.format("gui.advanced_memory_card.p2p_status.bound")
+            }
+            field = value
+        }
 
     // Widgets
     val bindButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.bind"))
@@ -83,9 +85,9 @@ class InfoWrapper(info: P2PInfo) {
                 append(typeName)
                 append(" - ")
                 if (output)
-                    append(I18n.format("gui.advanced_memory_card.desc.mode.output"))
+                    append(I18n.format("gui.advanced_memory_card.p2p_status.output"))
                 else
-                    append(I18n.format("gui.advanced_memory_card.desc.mode.input"))
+                    append(I18n.format("gui.advanced_memory_card.p2p_status.input"))
             }
             val online = info.hasChannel
             hoverInfo = mutableListOf(
@@ -112,9 +114,8 @@ class InfoWrapper(info: P2PInfo) {
                 "§e" + I18n.format("gui.advanced_memory_card.dim", info.world)
             )
         }
-
-
     }
+
     override fun hashCode(): Int {
         return code.hashCode()
     }

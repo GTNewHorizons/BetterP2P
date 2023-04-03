@@ -6,9 +6,10 @@ import com.projecturanus.betterp2p.capability.MemoryInfo
 import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.TextureBound
 import com.projecturanus.betterp2p.client.gui.widget.*
+import com.projecturanus.betterp2p.item.BetterMemoryCardModes
+import com.projecturanus.betterp2p.item.MAX_TOOLTIP_LENGTH
 import com.projecturanus.betterp2p.network.*
 import net.minecraft.client.gui.FontRenderer
-import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.resources.I18n
@@ -16,7 +17,6 @@ import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.GL11
-import java.util.*
 
 const val GUI_WIDTH = 288
 const val GUI_TEX_HEIGHT = 264
@@ -39,15 +39,18 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private val tableX = 9
     private val tableY = 19
 
-    private var scale = msg.memoryInfo.gui
-    private val resizeButton: WidgetButton
-
     private var _ySize: Lazy<Int> = lazy { 242 }
     private var ySize: Int
         get() = _ySize.value
         set(value) {
             _ySize = lazy { value }
         }
+
+    private var scale = msg.memoryInfo.gui
+    private val resizeButton: WidgetButton
+
+    private var mode = msg.memoryInfo.mode
+    private val modeButton: WidgetButton
 
     private val scrollBar: WidgetScrollBar
     private val searchBar: MEGuiTextField
@@ -59,10 +62,6 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     private var col: WidgetP2PColumn
 
-    private val descriptionLines: MutableList<String> = mutableListOf()
-    private var mode = msg.memoryInfo.mode
-    private var modeString = getModeString()
-    private val modeButton by lazy { GuiButton(0, 0, 0, 256, 20, modeString) }
     private val sortRules: List<String> by lazy {
         listOf(
             "§b§n" + I18n.format("gui.advanced_memory_card.sortinfo1"),
@@ -84,7 +83,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         col = WidgetP2PColumn(this, infos,0, 0,
             ::selectedInfo, ::mode, scrollBar)
         searchBar = MEGuiTextField(100, 10)
-        resizeButton = object: WidgetButton(this, 0, 0, 32, 32, { scale.unlocalizedName }) {
+        resizeButton = object: WidgetButton(this, 0, 0, 32, 32) {
             override fun mousePressed(mouseX: Int, mouseY: Int) {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     scale = when(scale) {
@@ -94,6 +93,39 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                         GuiScale.LARGE -> GuiScale.DYNAMIC
                     }
                     initGui()
+                    super.func_146113_a(mc.soundHandler)
+                }
+            }
+        }
+        modeButton = object: WidgetButton(this, 0, 0, 32, 32) {
+            val modeDescriptions: List<List<String>> = listOf(
+                fmtTooltips(
+                    title = BetterMemoryCardModes.OUTPUT.unlocalizedName,
+                    keys = BetterMemoryCardModes.OUTPUT.unlocalizedDesc,
+                    maxChars = MAX_TOOLTIP_LENGTH,
+                ),
+                fmtTooltips(
+                    title = BetterMemoryCardModes.INPUT.unlocalizedName,
+                    keys = BetterMemoryCardModes.INPUT.unlocalizedDesc,
+                    maxChars = MAX_TOOLTIP_LENGTH,
+                ),
+                fmtTooltips(
+                    title = BetterMemoryCardModes.COPY.unlocalizedName,
+                    keys = BetterMemoryCardModes.COPY.unlocalizedDesc,
+                    maxChars = MAX_TOOLTIP_LENGTH,
+                )
+            )
+
+            init {
+                hoverText = modeDescriptions[mode.ordinal]
+            }
+
+            override fun mousePressed(mouseX: Int, mouseY: Int) {
+                if (super.mousePressed(mc, mouseX, mouseY)) {
+                    mode = mode.next()
+                    hoverText = modeDescriptions[mode.ordinal]
+                    setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
+                    syncMemoryInfo()
                     super.func_146113_a(mc.soundHandler)
                 }
             }
@@ -108,6 +140,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         if (scale.minHeight > h) {
             scale = GuiScale.DYNAMIC
         }
+        resizeButton.hoverText = listOf(I18n.format(scale.unlocalizedName))
         val numEntries = scale.size(height - 75)
         ySize = (numEntries * P2PEntryConstants.HEIGHT) + 75 + (numEntries - 1)
         guiTop = (h - ySize) / 2
@@ -126,8 +159,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         col.resize(scale, h - 75)
         col.setPosition(guiLeft + tableX, guiTop + tableY)
 
-        modeButton.xPosition = guiLeft + 8
-        modeButton.yPosition = guiTop + ySize - 52
+        modeButton.setPosition(guiLeft - 32, guiTop + 34)
+        modeButton.setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
 
         resizeButton.setPosition(guiLeft - 32, guiTop + 2)
         resizeButton.setTexCoords(scale.ordinal * 32.0, 200.0)
@@ -140,8 +173,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private fun checkInfo() {
         infos.filtered.forEach { it.error = false }
         // A P2P entry is considered "errored" if it is an output, and has no inputs.
-        infos.filtered.groupBy { it.frequency }.filter { it.value.none { x -> !x.output } }.forEach { it.value.forEach { info ->
-            info.error = true
+        infos.filtered.groupBy { it.frequency }
+            .filter { it.value.none { x -> !x.output } }
+            .forEach { it.value.forEach {
+                info -> info.error = true
         } }
     }
 
@@ -153,14 +188,6 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     private fun syncMemoryInfo() {
         ModNetwork.channel.sendToServer(C2SUpdateInfo(MemoryInfo(infos.selectedEntry, selectedInfo?.frequency ?: 0, mode, scale)))
-    }
-
-    private fun drawInformation() {
-        var y = 214
-        for (line in descriptionLines) {
-            fontRendererObj.drawString(line, guiLeft + 8, modeButton.yPosition + 20 + 3, 0)
-            y += fontRendererObj.FONT_HEIGHT
-        }
     }
 
     override fun onGuiClosed() {
@@ -175,16 +202,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         drawBackground()
         // Draw the stuff that resets GL state first
         fontRendererObj.drawString(I18n.format("item.advanced_memory_card.name"), guiLeft + tableX, guiTop + 6, 0)
-        if (modeButton.func_146115_a()) {
-            descriptionLines.clear()
-            descriptionLines += I18n.format("gui.advanced_memory_card.desc.mode", I18n.format("gui.advanced_memory_card.mode.${mode.next().name.lowercase(Locale.getDefault())}"))
-        } else {
-            descriptionLines.clear()
-        }
-        drawInformation()
         searchBar.drawTextBox()
         resizeButton.draw(mc, mouseX, mouseY, partialTicks)
-        modeButton.drawButton(mc, mouseX, mouseY)
+        modeButton.draw(mc, mouseX, mouseY, partialTicks)
 
         // Now do our drawing
         GL11.glPushAttrib(GL11.GL_BLEND or GL11.GL_TEXTURE_2D or GL11.GL_COLOR)
@@ -199,23 +219,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         if (searchBar.isMouseIn(mouseX, mouseY)) {
             drawHoveringText(sortRules, guiLeft, guiTop + ySize - 40, fontRendererObj)
         } else if (resizeButton.isHovering(mouseX, mouseY)) {
-            drawHoveringText(listOf(I18n.format(resizeButton.hoverText())), mouseX, mouseY, fontRendererObj)
+            drawHoveringText(resizeButton.hoverText, mouseX, mouseY, fontRendererObj)
+        } else if (modeButton.isHovering(mouseX, mouseY)) {
+            drawHoveringText(modeButton.hoverText, mouseX, mouseY, fontRendererObj)
         } else {
             col.mouseHovered(mouseX, mouseY)
         }
         super.drawScreen(mouseX, mouseY, partialTicks)
-    }
-
-    private fun switchMode() {
-        // Switch mode
-        mode = mode.next()
-        modeString = getModeString()
-        modeButton.displayString = modeString
-        syncMemoryInfo()
-    }
-
-    private fun getModeString(): String {
-        return I18n.format("gui.advanced_memory_card.mode.${mode.name.lowercase(Locale.getDefault())}")
     }
 
     /**
@@ -247,11 +257,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         col.mouseClicked(mouseX, mouseY, mouseButton)
-        if (modeButton.mousePressed(mc, mouseX, mouseY)) {
-            switchMode()
-            modeButton.func_146113_a(mc.soundHandler)
-        }
         scrollBar.click(mouseX, mouseY)
+        modeButton.mousePressed(mouseX, mouseY)
         resizeButton.mousePressed(mouseX, mouseY)
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         if (mouseButton == 1 && searchBar.isMouseIn(mouseX, mouseY)) {
@@ -273,11 +280,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     override fun handleMouseInput() {
         super.handleMouseInput()
         val i = Mouse.getEventDWheel()
-        if (i != 0 && isShiftKeyDown()) {
-//            val x = Mouse.getEventX() * width / mc.displayWidth
-//            val y = height - Mouse.getEventY() * height / mc.displayHeight - 1
-//            this.mouseWheelEvent(x, y, i / Math.abs(i))
-        } else if (i != 0) {
+        if (i != 0) {
             scrollBar.wheel(i)
             col.finishRename()
         }
@@ -334,4 +337,34 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     public override fun drawHoveringText(textLines: List<Any?>?, x: Int, y: Int, font: FontRenderer?) {
         super.drawHoveringText(textLines, x, y, font)
     }
+}
+
+/**
+ * Format multiple lines of tooltips by the given max chars.
+ */
+fun fmtTooltips(title: String, vararg keys: String, maxChars: Int): List<String> {
+    val result: MutableList<String> = mutableListOf()
+    result.add(I18n.format(title))
+    for (key in keys) {
+        val words = I18n.format(key).split(' ')
+        var i = 0
+        if (key.length < maxChars) {
+            result.add(key)
+        }
+        while (i < words.size) {
+            val s = StringBuilder()
+            perWord@
+            while (s.length < maxChars) {
+                s.append(words[i])
+                i += 1
+                if (i >= words.size) break@perWord
+                s.append(" ")
+            }
+            if (!s.startsWith('§')) {
+                s.insert(0, "§7")
+            }
+            result.add(s.toString())
+        }
+    }
+    return result
 }

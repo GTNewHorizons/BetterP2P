@@ -1,6 +1,5 @@
 package com.projecturanus.betterp2p.client.gui.widget
 
-import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.client.gui.GUI_TEX_HEIGHT
 import com.projecturanus.betterp2p.client.gui.GUI_WIDTH
 import com.projecturanus.betterp2p.client.gui.GuiAdvancedMemoryCard
@@ -19,11 +18,12 @@ import org.lwjgl.opengl.GL11
  * @param height
  * @param hoverText - unlocalized text to display when mouse hovering
  */
-abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, width: Int, height: Int,
-                            val hoverText: () -> String): GuiButton(0, x, y, width, height, "") {
+abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, width: Int, height: Int):
+    GuiButton(0, x, y, width, height, "") {
 
     private var texX = 0.0
     private var texY = 0.0
+    var hoverText: List<String> = listOf()
 
     abstract fun mousePressed(mouseX: Int, mouseY: Int)
 
@@ -41,8 +41,8 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
             u0 = (32.0 * k) / GUI_WIDTH, v0 = (232.0) / GUI_TEX_HEIGHT,
             u1 = (32.0 * (k + 1)) / GUI_WIDTH, v1 = (232.0 + height) / GUI_TEX_HEIGHT)
         // Draw button icon
-        drawTexturedQuad(tessellator, xPosition.toDouble(), yPosition.toDouble(),
-            (xPosition + width).toDouble(), (yPosition + height).toDouble(),
+        drawTexturedQuad(tessellator, xPosition + 1.0, yPosition + 1.0,
+            xPosition + width - 1.0, yPosition + height - 1.0,
             u0 = texX / GUI_WIDTH, v0 = texY / GUI_TEX_HEIGHT,
             u1 = (texX + width) / GUI_WIDTH, v1 = (texY + height) / GUI_TEX_HEIGHT)
 

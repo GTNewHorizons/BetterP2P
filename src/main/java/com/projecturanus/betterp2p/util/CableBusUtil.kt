@@ -2,13 +2,16 @@ package com.projecturanus.betterp2p.util
 
 import appeng.api.config.SecurityPermissions
 import appeng.api.networking.IGrid
+import appeng.api.networking.IGridHost
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
 import appeng.api.parts.IPartHost
 import appeng.api.parts.SelectedPart
+import appeng.api.util.IReadOnlyCollection
 import appeng.parts.AEBasePart
 import appeng.parts.ICableBusContainer
 import appeng.parts.p2p.PartP2PTunnel
+import appeng.parts.p2p.PartP2PTunnelME
 import appeng.tile.networking.TileCableBus
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.tileentity.TileEntity
@@ -49,6 +52,15 @@ fun listTargetGridP2P(grid: IGrid?, player: EntityPlayer, clazz: Class<out PartP
             return emptyList()
 
     return grid?.getMachines(clazz)?.map { it.machine as PartP2PTunnel<*> }?.toList() ?: emptyList()
+}
+
+fun listAllGridP2P(grid: IGrid?, player: EntityPlayer): List<PartP2PTunnel<*>> {
+    if (grid is ISecurityGrid && !grid.hasPermission(player, SecurityPermissions.BUILD))
+        return emptyList()
+    val classes = grid?.machinesClasses?.filter { c -> c.superclass == PartP2PTunnel::class.java } ?: emptyList()
+    val ret: MutableList<PartP2PTunnel<*>> = mutableListOf()
+    classes.forEach{ c -> ret.addAll(grid?.getMachines(c)?.map { it.machine as PartP2PTunnel<*> } ?: emptyList()) }
+    return ret
 }
 
 val AEBasePart.facingPosX: Int?
