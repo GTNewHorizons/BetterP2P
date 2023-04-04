@@ -14,6 +14,7 @@ import com.projecturanus.betterp2p.network.hashP2P
 import com.projecturanus.betterp2p.util.getPart
 import com.projecturanus.betterp2p.util.p2p.P2PCache
 import com.projecturanus.betterp2p.util.p2p.P2PStatus
+import com.projecturanus.betterp2p.util.p2p.areP2PEqual
 import com.projecturanus.betterp2p.util.p2p.toInfo
 import cpw.mods.fml.relauncher.Side
 import cpw.mods.fml.relauncher.SideOnly
@@ -76,19 +77,21 @@ object ItemAdvancedMemoryCard : Item() {
                 val info = getInfo(stack)
                 if (part is PartP2PTunnel<*>) {
                     val status = P2PStatus(player, part.gridNode.grid, part)
-                    val p2p = status.listP2P.values.first { it == status.targetP2P }
-                    info.selectedEntry = hashP2P(p2p)
-                    writeInfo(stack, info)
+                    val p2p = status.listP2P.values.firstOrNull { areP2PEqual(it, status.targetP2P) }
+                    if (p2p != null) {
+                        info.selectedEntry = hashP2P(p2p)
+                        writeInfo(stack, info)
 
-                    sendStatus(status, info, player as EntityPlayerMP)
-                    return true
-                } else {
-                    val node = te.getGridNode(ForgeDirection.getOrientation(side))!!
-                    info.selectedEntry = NONE
-                    writeInfo(stack, info)
-                    sendStatus(P2PStatus(player, node.grid), info, player as EntityPlayerMP)
-                    return true
+                        sendStatus(status, info, player as EntityPlayerMP)
+                        return true
+                    }
                 }
+                // Fallback to sending the whole network
+                val node = te.getGridNode(ForgeDirection.getOrientation(side))!!
+                info.selectedEntry = NONE
+                writeInfo(stack, info)
+                sendStatus(P2PStatus(player, node.grid), info, player as EntityPlayerMP)
+                return true
             }
         }
         return false

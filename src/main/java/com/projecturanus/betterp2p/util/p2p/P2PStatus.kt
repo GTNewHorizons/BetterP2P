@@ -15,3 +15,12 @@ class P2PStatus(player: EntityPlayer, grid: IGrid, val targetP2P: PartP2PTunnel<
             .forEach { listP2P[hashP2P(it)] = it }
     }
 }
+
+fun areP2PEqual(a: PartP2PTunnel<*>?, b: PartP2PTunnel<*>?): Boolean {
+    if (a == b) {
+        return true;
+    } else if(a != null && b != null) {
+        return hashP2P(a) == hashP2P(b)
+    }
+    return false;
+}
