@@ -10,6 +10,7 @@ import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import com.projecturanus.betterp2p.network.*
 import net.minecraft.client.gui.GuiTextField
 import net.minecraftforge.common.util.ForgeDirection
+import org.lwjgl.input.Keyboard
 import kotlin.reflect.KProperty0
 
 /**
@@ -167,8 +168,10 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
 
     fun keyTyped(char: Char, key: Int): Boolean {
         if (renameBar.isFocused) {
-            if (!renameBar.textboxKeyTyped(char, key)) {
+            if (key == Keyboard.KEY_RETURN) {
                 finishRename()
+            } else {
+                renameBar.textboxKeyTyped(char, key)
             }
             return true
         }
