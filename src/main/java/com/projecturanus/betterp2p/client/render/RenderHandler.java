@@ -3,8 +3,6 @@ package com.projecturanus.betterp2p.client.render;
 import java.util.ArrayList;
 import java.util.List;
 
-import kotlin.Pair;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -16,6 +14,7 @@ import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import kotlin.Pair;
 
 public class RenderHandler {
 
