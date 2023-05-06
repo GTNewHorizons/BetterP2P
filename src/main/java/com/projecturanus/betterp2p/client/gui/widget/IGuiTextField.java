@@ -1,8 +1,8 @@
 package com.projecturanus.betterp2p.client.gui.widget;
 
-import appeng.client.gui.widgets.MEGuiTextField;
-
 import com.projecturanus.betterp2p.client.gui.InfoWrapper;
+
+import appeng.client.gui.widgets.MEGuiTextField;
 
 public class IGuiTextField extends MEGuiTextField {
 

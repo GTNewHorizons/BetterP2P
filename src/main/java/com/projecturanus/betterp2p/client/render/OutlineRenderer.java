@@ -3,8 +3,6 @@ package com.projecturanus.betterp2p.client.render;
 import java.util.Collection;
 import java.util.List;
 
-import kotlin.Pair;
-
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -13,6 +11,8 @@ import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
 import com.projecturanus.betterp2p.util.GlStateManager;
+
+import kotlin.Pair;
 
 /**
  * Everything in this inner class is From a mod that has MIT license owned by romelo333 and maintained by McJty
