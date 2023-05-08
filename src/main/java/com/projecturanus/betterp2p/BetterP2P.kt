@@ -1,17 +1,13 @@
 package com.projecturanus.betterp2p
 
-import com.projecturanus.betterp2p.client.render.RenderHandler
 import com.projecturanus.betterp2p.config.BetterP2PConfig
 import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard
 import com.projecturanus.betterp2p.network.ModNetwork
-import com.projecturanus.betterp2p.network.ServerPlayerDisconnectHandler
 import cpw.mods.fml.common.Mod
+import cpw.mods.fml.common.SidedProxy
 import cpw.mods.fml.common.event.FMLPostInitializationEvent
 import cpw.mods.fml.common.event.FMLPreInitializationEvent
 import cpw.mods.fml.common.registry.GameRegistry
-import cpw.mods.fml.relauncher.FMLLaunchHandler
-import net.minecraft.item.ItemStack
-import net.minecraft.item.crafting.ShapelessRecipes
 import net.minecraftforge.common.config.Configuration
 import org.apache.logging.log4j.Logger
 
@@ -25,8 +21,10 @@ const val MODID = "betterp2p"
  */
 @Mod(modid = MODID, version = MODVER, modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter", dependencies = "required-after:appliedenergistics2; required-after:forgelin;")
 object BetterP2P {
-    lateinit var logger: Logger
 
+    lateinit var logger: Logger
+    @SidedProxy(serverSide = "com.projecturanus.betterp2p.CommonProxy", clientSide = "com.projecturanus.betterp2p.ClientProxy")
+    lateinit var proxy: CommonProxy
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
         logger = event.modLog
@@ -37,13 +35,6 @@ object BetterP2P {
 
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
-        ServerPlayerDisconnectHandler.register()
-        if(FMLLaunchHandler.side().isClient()) {
-            RenderHandler.register()
-        }
-        GameRegistry.addRecipe(ShapelessRecipes(ItemStack(ItemAdvancedMemoryCard), listOf(
-            GameRegistry.findItemStack("appliedenergistics2", "item.ToolNetworkTool", 1),
-            GameRegistry.findItemStack("appliedenergistics2", "item.ToolMemoryCard", 1)
-        )))
+        proxy.postInit()
     }
 }
