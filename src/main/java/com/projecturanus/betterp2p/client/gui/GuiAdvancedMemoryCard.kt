@@ -1,14 +1,17 @@
 package com.projecturanus.betterp2p.client.gui
 
 import appeng.client.gui.widgets.MEGuiTextField
+import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.capability.MemoryInfo
+import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.TextureBound
 import com.projecturanus.betterp2p.client.gui.widget.*
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import com.projecturanus.betterp2p.item.MAX_TOOLTIP_LENGTH
 import com.projecturanus.betterp2p.network.*
+import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator
@@ -51,6 +54,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     private var mode = msg.memoryInfo.mode
     private val modeButton: WidgetButton
+
+    private var type: TunnelInfo? = BetterP2P.proxy.getP2PFromIndex(msg.memoryInfo.type)
+    private val typeButton: WidgetButton
 
     private val scrollBar: WidgetScrollBar
     private val searchBar: MEGuiTextField
@@ -130,6 +136,28 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 }
             }
         }
+        typeButton = object: WidgetButton(this, 0, 0, 32, 32) {
+            val types = BetterP2P.proxy.getP2PTypeList()
+            private var index = 0
+
+            private fun nextType(): TunnelInfo {
+                // range: [0, types.size - 1]
+                index = (index + 1).rem(types.size)
+                return types[index]
+            }
+
+            override fun mousePressed(mouseX: Int, mouseY: Int) {
+                if (super.mousePressed(mc, mouseX, mouseY)) {
+                    type = nextType()
+                    hoverText = listOf(type!!.stack.displayName)
+                    requestRefresh()
+                    super.func_146113_a(mc.soundHandler)
+                }
+//                    setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
+//                    syncMemoryInfo()
+            }
+
+        }
     }
 
     // Note this is called on resize too.
@@ -180,6 +208,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         } }
     }
 
+    /**
+     * Request a refresh from C->S.
+     * TODO: Implement
+     */
+    fun requestRefresh() {
+    }
+
     fun refreshInfo(infos: List<P2PInfo>) {
         this.infos.rebuild(infos.map(::InfoWrapper))
         checkInfo()
@@ -187,7 +222,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     private fun syncMemoryInfo() {
-        ModNetwork.channel.sendToServer(C2SUpdateInfo(MemoryInfo(infos.selectedEntry, selectedInfo?.frequency ?: 0, mode, scale)))
+        ModNetwork.channel.sendToServer(
+            C2SUpdateInfo(MemoryInfo(infos.selectedEntry, selectedInfo?.frequency ?: 0, mode, scale, type?.index ?: TUNNEL_ANY)))
     }
 
     override fun onGuiClosed() {

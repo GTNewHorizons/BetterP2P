@@ -20,10 +20,6 @@ object P2PEntryConstants {
     const val LEFT_ALIGN = 24
 }
 
-val typeIcons: List<IIcon> = listOf(
-
-)
-
 class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>, val modeSupplier: () -> BetterMemoryCardModes, val infoSupplier: () -> InfoWrapper?, var x: Int, var y: Int): Widget() {
 
     var renderNameTextField = true
@@ -113,14 +109,26 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
 
     private fun drawIcon(gui: GuiAdvancedMemoryCard, icon: IIcon, overlay: IIcon, x: Int, y: Int) {
         val tessellator = Tessellator.instance
-        gui.mc.renderEngine.bindTexture(gui.mc.renderEngine.getResourceLocation(0))
+        gui.bindTexture(gui.mc.renderEngine.getResourceLocation(0))
         GL11.glPushAttrib(GL11.GL_BLEND or GL11.GL_TEXTURE_2D or GL11.GL_COLOR)
         GL11.glEnable(GL11.GL_BLEND)
         GL11.glEnable(GL11.GL_TEXTURE_2D)
         GL11.glColor3f(255f, 255f, 255f)
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0)
-        drawTexturedQuad(tessellator, x.toDouble() + 1, y.toDouble() + 1, x + 15.0, y + 15.0, icon.minU.toDouble(), icon.minV.toDouble(), icon.maxU.toDouble(), icon.maxV.toDouble())
-        drawTexturedQuad(tessellator, x.toDouble(), y.toDouble(), x + 16.0, y + 16.0, overlay.minU.toDouble(), overlay.minV.toDouble(), overlay.maxU.toDouble(), overlay.maxV.toDouble())
+        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0)
+        drawTexturedQuad(tessellator,
+            x0 = x.toDouble() + 1,
+            y0 = y.toDouble() + 1,
+            x1 = x + 15.0,
+            y1 = y + 15.0,
+            u0 = icon.minU.toDouble(), v0 = icon.minV.toDouble(),
+            u1 = icon.maxU.toDouble(), v1 = icon.maxV.toDouble())
+        drawTexturedQuad(tessellator,
+            x0 = x.toDouble(),
+            y0 = y.toDouble(),
+            x1 = x + 16.0,
+            y1 = y + 16.0,
+            u0 = overlay.minU.toDouble(), v0 = overlay.minV.toDouble(),
+            u1 = overlay.maxU.toDouble(), v1 = overlay.maxV.toDouble())
         GL11.glPopAttrib()
     }
 }

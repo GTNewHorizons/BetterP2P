@@ -96,7 +96,7 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
     }
 
     private fun onBindButtonClicked(info: InfoWrapper) {
-        if (infos.selectedEntry == NONE) return
+        if (infos.selectedEntry == NONE_SELECTED) return
         when (mode()) {
             BetterMemoryCardModes.INPUT -> {
                 BetterP2P.logger.debug("Bind ${info.code} as input")

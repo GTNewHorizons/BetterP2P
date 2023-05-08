@@ -1,8 +1,6 @@
 package com.projecturanus.betterp2p.client.gui
 
-import com.projecturanus.betterp2p.network.NONE
-import com.projecturanus.betterp2p.network.hashP2P
-import kotlin.math.absoluteValue
+import com.projecturanus.betterp2p.network.NONE_SELECTED
 import kotlin.reflect.KProperty0
 
 /**
@@ -43,7 +41,7 @@ class InfoList (initList: Collection<InfoWrapper>,
     val selectedInfo: InfoWrapper?
         get() = masterMap[selectedEntry]
 
-    var selectedEntry: Long = NONE
+    var selectedEntry: Long = NONE_SELECTED
 
     val size: Int
         get() = masterMap.size
@@ -143,7 +141,7 @@ class InfoList (initList: Collection<InfoWrapper>,
         if (masterMap.containsKey(hashCode)) {
             selectedEntry = hashCode
         } else {
-            selectedEntry = NONE
+            selectedEntry = NONE_SELECTED
         }
     }
 }

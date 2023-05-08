@@ -5,7 +5,6 @@ import appeng.api.networking.IGrid
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
-import appeng.helpers.DualityInterface
 import appeng.me.GridAccessException
 import appeng.me.GridNode
 import appeng.parts.automation.UpgradeInventory
@@ -13,6 +12,8 @@ import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PTunnel
 import appeng.tile.inventory.AppEngInternalInventory
 import appeng.util.Platform
+import com.projecturanus.betterp2p.BetterP2P
+import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.network.P2PInfo
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
@@ -146,4 +147,11 @@ val PartP2PTunnel<*>.hasChannel
 fun PartP2PTunnel<*>.toInfo()
     = P2PInfo(frequency, location.x, location.y, location.z, location.dimension, side,
               customName, isOutput, hasChannel, (externalFacingNode as? GridNode)?.usedChannels() ?: -1,
-              getItemStack(PartItemStack.Wrench))
+              getTypeIndex())
+
+/**
+ * Get the type index or use TUNNEL_ANY
+ */
+fun PartP2PTunnel<*>.getTypeIndex()
+    = BetterP2P.proxy.getP2PFromClass(this.javaClass)?.index ?: TUNNEL_ANY
+

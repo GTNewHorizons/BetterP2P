@@ -2,8 +2,6 @@ package com.projecturanus.betterp2p.network
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.common.util.ForgeDirection
 
 fun readInfo(buf: ByteBuf): P2PInfo {
@@ -20,13 +18,9 @@ fun readInfo(buf: ByteBuf): P2PInfo {
     }
     val output = buf.readBoolean()
     val hasChannel = buf.readBoolean()
-    val channels = buf.readInt()
-    val compound = NBTTagCompound()
-    compound.setShort("id", buf.readShort())
-    compound.setShort("Damage", buf.readShort())
-    compound.setShort("Count", 1)
-    val stack = ItemStack.loadItemStackFromNBT(compound);
-    return P2PInfo(freq, posX, posY, posZ,world, facing, name, output, hasChannel, channels, stack)
+    val channels = buf.readByte().toInt()
+    val type = buf.readByte().toInt()
+    return P2PInfo(freq, posX, posY, posZ,world, facing, name, output, hasChannel, channels, type)
 }
 
 fun writeInfo(buf: ByteBuf, info: P2PInfo) {
@@ -42,11 +36,8 @@ fun writeInfo(buf: ByteBuf, info: P2PInfo) {
     }
     buf.writeBoolean(info.output)
     buf.writeBoolean(info.hasChannel)
-    buf.writeInt(info.channels)
-    val compound = NBTTagCompound()
-    info.stack.writeToNBT(compound)
-    buf.writeShort(compound.getShort("id").toInt())
-    buf.writeShort(compound.getShort("Damage").toInt())
+    buf.writeByte(info.channels)
+    buf.writeByte(info.type)
 }
 
 class S2CRefreshInfo(var infos: List<P2PInfo> = emptyList()) : IMessage {
