@@ -30,6 +30,7 @@ enum class BetterMemoryCardModes(val unlocalizedName: String, vararg val unlocal
         "gui.advanced_memory_card.mode.copy.desc.1",
         "gui.advanced_memory_card.mode.copy.desc.2",
         "gui.advanced_memory_card.mode.copy.desc.3",
+        "gui.advanced_memory_card.mode.copy.desc.4",
     );
 
     fun next(): BetterMemoryCardModes {

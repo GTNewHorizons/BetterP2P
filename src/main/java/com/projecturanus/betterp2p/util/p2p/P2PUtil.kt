@@ -7,6 +7,7 @@ import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
 import appeng.me.GridAccessException
 import appeng.me.GridNode
+import appeng.me.cache.P2PCache
 import appeng.parts.automation.UpgradeInventory
 import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PTunnel
@@ -23,7 +24,7 @@ import net.minecraftforge.common.util.ForgeDirection
 fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P2PStatus) : Pair<PartP2PTunnel<*>, PartP2PTunnel<*>>? {
     // If these calls mess up we have bigger problems...
     val input = status.listP2P[inputIndex]!!
-    val output = status.listP2P[outputIndex]!!
+    var output = status.listP2P[outputIndex]!!
 
     val grid: IGrid? = input.gridNode?.grid
     if (grid is ISecurityGrid) {
@@ -34,8 +35,27 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
 
     // TODO Change to exception
     if (input.javaClass != output.javaClass) {
-        // Cannot pair two different type of P2P
-        return null
+        //change output to input
+        val host = output.host
+        host.removePart(output.side, false)
+        val dir = host.addPart(input.getItemStack(PartItemStack.Wrench), output.side, player)
+        val newPart = host.getPart(dir)
+        if (newPart is PartP2PTunnel<*>) {
+            newPart.outputProperty = true
+            newPart.onTunnelNetworkChange()
+            try {
+                val p2p: P2PCache = newPart.proxy.p2P
+                p2p.updateFreq(newPart, output.frequency)
+                output = newPart
+            } catch (e: GridAccessException) {
+                // :P
+            }
+
+            println("part changed")
+        } else {
+            // error
+            return null
+        }
     }
     if (input == output) {
         // Network loop

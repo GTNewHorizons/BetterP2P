@@ -15,9 +15,7 @@ class ServerLinkP2PHandler : IMessageHandler<C2SLinkP2P, IMessage?> {
         if (result != null) {
             status.listP2P[message.input] = result.first
             status.listP2P[message.output] = result.second
-            ModNetwork.channel.sendTo(
-                S2CRefreshInfo(status.listP2P.values.map { it.toInfo() }),
-                ctx.serverHandler.playerEntity)
+            return S2CRefreshInfo(status.refresh(status.lastP2PType).map { it.toInfo() })
         }
         return null
     }

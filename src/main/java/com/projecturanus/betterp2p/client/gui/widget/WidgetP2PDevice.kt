@@ -3,10 +3,8 @@ package com.projecturanus.betterp2p.client.gui.widget
 import com.projecturanus.betterp2p.client.gui.*
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.resources.I18n
-import net.minecraft.util.IIcon
 import org.lwjgl.opengl.GL11
 import kotlin.reflect.KProperty0
 
@@ -81,7 +79,8 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
             }
 
             val mode = modeSupplier()
-            if (mode == BetterMemoryCardModes.COPY && !info.output && info.frequency != 0.toLong()) {
+            if (mode == BetterMemoryCardModes.COPY && (!info.output && info.frequency != 0.toLong()) ||
+                    selectedInfo?.output == true) {
                 info.bindButton.enabled = false
             }
             drawButtons(gui, info, mouseX, mouseY, partialTicks)
