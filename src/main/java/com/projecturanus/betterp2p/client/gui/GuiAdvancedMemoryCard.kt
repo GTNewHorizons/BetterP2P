@@ -1,6 +1,9 @@
 package com.projecturanus.betterp2p.client.gui
 
 import appeng.client.gui.widgets.MEGuiTextField
+import appeng.parts.p2p.PartP2PLiquids
+import appeng.parts.p2p.PartP2PRedstone
+import appeng.parts.p2p.PartP2PTunnelME
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.capability.MemoryInfo
@@ -11,11 +14,14 @@ import com.projecturanus.betterp2p.client.gui.widget.*
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import com.projecturanus.betterp2p.item.MAX_TOOLTIP_LENGTH
 import com.projecturanus.betterp2p.network.*
+import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
 import com.projecturanus.betterp2p.util.p2p.TunnelInfo
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.resources.I18n
+import net.minecraft.init.Blocks
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
@@ -55,7 +61,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private var mode = msg.memoryInfo.mode
     private val modeButton: WidgetButton
 
-    private var type: TunnelInfo? = BetterP2P.proxy.getP2PFromIndex(msg.memoryInfo.type)
+    private var type: ClientTunnelInfo? = BetterP2P.proxy.getP2PFromIndex(msg.memoryInfo.type) as? ClientTunnelInfo
+    private var typeCooldown: Long = System.currentTimeMillis()
+    private var typeUpdateReady: Boolean = true
     private val typeButton: WidgetButton
 
     private val scrollBar: WidgetScrollBar
@@ -90,19 +98,29 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             ::selectedInfo, ::mode, scrollBar)
         searchBar = MEGuiTextField(100, 10)
         resizeButton = object: WidgetButton(this, 0, 0, 32, 32) {
-            override fun mousePressed(mouseX: Int, mouseY: Int) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
-                    scale = when(scale) {
-                        GuiScale.DYNAMIC -> GuiScale.SMALL
-                        GuiScale.SMALL -> GuiScale.NORMAL
-                        GuiScale.NORMAL -> GuiScale.LARGE
-                        GuiScale.LARGE -> GuiScale.DYNAMIC
+                    if (button == 0) {
+                        scale = when (scale) {
+                            GuiScale.DYNAMIC -> GuiScale.SMALL
+                            GuiScale.SMALL -> GuiScale.NORMAL
+                            GuiScale.NORMAL -> GuiScale.LARGE
+                            GuiScale.LARGE -> GuiScale.DYNAMIC
+                        }
+                    } else if (button == 1) {
+                        scale = when (scale) {
+                            GuiScale.DYNAMIC -> GuiScale.LARGE
+                            GuiScale.LARGE -> GuiScale.NORMAL
+                            GuiScale.NORMAL -> GuiScale.SMALL
+                            GuiScale.SMALL -> GuiScale.DYNAMIC
+                        }
                     }
                     initGui()
                     super.func_146113_a(mc.soundHandler)
                 }
             }
         }
+
         modeButton = object: WidgetButton(this, 0, 0, 32, 32) {
             val modeDescriptions: List<List<String>> = listOf(
                 fmtTooltips(
@@ -126,7 +144,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 hoverText = modeDescriptions[mode.ordinal]
             }
 
-            override fun mousePressed(mouseX: Int, mouseY: Int) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     mode = mode.next()
                     hoverText = modeDescriptions[mode.ordinal]
@@ -136,31 +154,89 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 }
             }
         }
+
         typeButton = object: WidgetButton(this, 0, 0, 32, 32) {
             val types = BetterP2P.proxy.getP2PTypeList()
-            private var index = 0
+            private var index =
+                if (type != null) {
+                    types.first { it.index == type?.index}.index
+                } else {
+                    types.size
+                }
+            private val me = BetterP2P.proxy.getP2PFromClass(PartP2PTunnelME::class.java) as ClientTunnelInfo
+            private val fluid = BetterP2P.proxy.getP2PFromClass(PartP2PLiquids::class.java) as ClientTunnelInfo
+            private val redstone = BetterP2P.proxy.getP2PFromClass(PartP2PRedstone::class.java) as ClientTunnelInfo
 
-            private fun nextType(): TunnelInfo {
-                // range: [0, types.size - 1]
-                index = (index + 1).rem(types.size)
-                return types[index]
+            init {
+                hoverText = if (type == null) {
+                    listOf("Any")
+                } else {
+                    listOf(type!!.stack.displayName)
+                }
             }
 
-            override fun mousePressed(mouseX: Int, mouseY: Int) {
+            private fun nextType(reverse: Boolean): ClientTunnelInfo? {
+                // range: [0, types.size]
+                return if (reverse) {
+                    index = (index - 1).rem(types.size + 1)
+                    types.getOrNull(index) as? ClientTunnelInfo
+                } else {
+                    index = (index + 1).rem(types.size + 1)
+                    types.getOrNull(index) as? ClientTunnelInfo
+                }
+            }
+
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
-                    type = nextType()
-                    hoverText = listOf(type!!.stack.displayName)
+                    if (button == 1) {
+                        // open type selector?
+                    } else {
+                        type = nextType(false)
+                    }
+                    hoverText =
+                        if (type == null) {
+                            listOf("Any")
+                        } else {
+                            listOf(type!!.stack.displayName)
+                        }
                     requestRefresh()
                     super.func_146113_a(mc.soundHandler)
                 }
-//                    setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
-//                    syncMemoryInfo()
             }
 
+            override fun draw(mc: Minecraft, mouseX: Int, mouseY: Int, partialTicks: Float) {
+                val tessellator = Tessellator.instance
+                drawBG(tessellator, mouseX, mouseY, partialTicks)
+                if (type != null) {
+                    drawBlockIcon(mc, type!!.icon(), type!!.stack.iconIndex,
+                        x = this.xPosition + 2,
+                        y = this.yPosition + 2,
+                        width = 28.0,
+                        height = 28.0)
+                } else {
+                    drawBlockIcon(mc, redstone.icon(), types[0].stack.iconIndex,
+                        x = this.xPosition + 12,
+                        y = this.yPosition + 12,
+                        width = 18.0,
+                        height = 18.0)
+                    drawBlockIcon(mc, fluid.icon(), types[0].stack.iconIndex,
+                        x = this.xPosition + 7,
+                        y = this.yPosition + 7,
+                        width = 18.0,
+                        height = 18.0)
+                    drawBlockIcon(mc, me.icon(), types[0].stack.iconIndex,
+                        x = this.xPosition + 2,
+                        y = this.yPosition + 2,
+                        width = 18.0,
+                        height = 18.0)
+                }
+            }
         }
     }
 
-    // Note this is called on resize too.
+    /**
+     * Called on resize. Initializes GUI elements.
+     */
     override fun initGui() {
         super.initGui()
         checkInfo()
@@ -187,11 +263,17 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         col.resize(scale, h - 75)
         col.setPosition(guiLeft + tableX, guiTop + tableY)
 
-        modeButton.setPosition(guiLeft - 32, guiTop + 34)
-        modeButton.setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
-
         resizeButton.setPosition(guiLeft - 32, guiTop + 2)
         resizeButton.setTexCoords(scale.ordinal * 32.0, 200.0)
+        buttonList.add(resizeButton)
+
+        modeButton.setPosition(guiLeft - 32, guiTop + 34)
+        modeButton.setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
+        buttonList.add(modeButton)
+
+        typeButton.setPosition(guiLeft - 32, guiTop + 66)
+        typeButton.setTexCoords(0.0, 200.0)
+        buttonList.add(typeButton)
 
         infos.refresh()
         checkInfo()
@@ -213,6 +295,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
      * TODO: Implement
      */
     fun requestRefresh() {
+        // Let's make sure the server only gets the last request in the last 250 ms, so we don't get spammed.
+        val time = System.currentTimeMillis()
+        typeCooldown = time + 250
+        if (typeUpdateReady && time < typeCooldown) {
+            ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
+            typeUpdateReady = false
+        }
     }
 
     fun refreshInfo(infos: List<P2PInfo>) {
@@ -239,10 +328,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         // Draw the stuff that resets GL state first
         fontRendererObj.drawString(I18n.format("item.advanced_memory_card.name"), guiLeft + tableX, guiTop + 6, 0)
         searchBar.drawTextBox()
-        resizeButton.draw(mc, mouseX, mouseY, partialTicks)
-        modeButton.draw(mc, mouseX, mouseY, partialTicks)
+        buttonList.forEach { it as WidgetButton
+            it.draw(mc, mouseX, mouseY, partialTicks)
+        }
 
-        // Now do our drawing
+        // Now draw our P2P entries
         GL11.glPushAttrib(GL11.GL_BLEND or GL11.GL_TEXTURE_2D or GL11.GL_COLOR)
         GL11.glEnable(GL11.GL_BLEND)
         GL11.glEnable(GL11.GL_TEXTURE_2D)
@@ -252,16 +342,27 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         col.render(this, mouseX, mouseY, partialTicks)
         // The GL state is already messed up here by string drawing but oh well
         GL11.glPopAttrib()
-        if (searchBar.isMouseIn(mouseX, mouseY)) {
-            drawHoveringText(sortRules, guiLeft, guiTop + ySize - 40, fontRendererObj)
-        } else if (resizeButton.isHovering(mouseX, mouseY)) {
-            drawHoveringText(resizeButton.hoverText, mouseX, mouseY, fontRendererObj)
-        } else if (modeButton.isHovering(mouseX, mouseY)) {
-            drawHoveringText(modeButton.hoverText, mouseX, mouseY, fontRendererObj)
-        } else {
-            col.mouseHovered(mouseX, mouseY)
+        var drewHoverText = false
+        run finished@ {
+            buttonList.forEach { it as WidgetButton
+                if (it.isHovering(mouseX, mouseY)) {
+                    drawHoveringText(it.hoverText, mouseX, mouseY + 10, fontRendererObj)
+                    drewHoverText = true
+                    return@finished
+                }
+            }
         }
-        super.drawScreen(mouseX, mouseY, partialTicks)
+        if (!drewHoverText) {
+            if (searchBar.isMouseIn(mouseX, mouseY)) {
+                drawHoveringText(sortRules, guiLeft, guiTop + ySize - 40, fontRendererObj)
+            } else {
+                col.mouseHovered(mouseX, mouseY)
+            }
+        }
+        if (!typeUpdateReady && System.currentTimeMillis() > typeCooldown) {
+            typeUpdateReady = true
+            ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
+        }
     }
 
     /**
@@ -294,8 +395,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         col.mouseClicked(mouseX, mouseY, mouseButton)
         scrollBar.click(mouseX, mouseY)
-        modeButton.mousePressed(mouseX, mouseY)
-        resizeButton.mousePressed(mouseX, mouseY)
+        modeButton.mousePressed(mouseX, mouseY, mouseButton)
+        resizeButton.mousePressed(mouseX, mouseY, mouseButton)
+        typeButton.mousePressed(mouseX, mouseY, mouseButton)
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         if (mouseButton == 1 && searchBar.isMouseIn(mouseX, mouseY)) {
             this.searchBar.text = ""
@@ -335,21 +437,30 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         bindTexture(BACKGROUND)
         val tessellator = Tessellator.instance
         // Draw the top part
-        drawTexturedQuad(tessellator, guiLeft.toDouble(), guiTop.toDouble(),
-            (guiLeft + GUI_WIDTH).toDouble(), guiTop + 60.0,
+        drawTexturedQuad(tessellator,
+            x0 = guiLeft.toDouble(),
+            y0 = guiTop.toDouble(),
+            x1 = (guiLeft + GUI_WIDTH).toDouble(),
+            y1 = guiTop + 60.0,
             u0 = 0.0, v0 = 0.0,
             u1 = 1.0, v1 = 60.0 / GUI_TEX_HEIGHT)
         // Draw P2P segments
         val p2pHeight = P2PEntryConstants.HEIGHT + 1.0
         for (i in 0 until scale.size(ySize - 75) - 2) {
-            drawTexturedQuad(tessellator, guiLeft.toDouble(), guiTop + 60.0 + p2pHeight * i,
-                (guiLeft + GUI_WIDTH).toDouble(), guiTop + 60.0 + p2pHeight * (i + 1),
+            drawTexturedQuad(tessellator,
+                x0 = guiLeft.toDouble(),
+                y0 = guiTop + 60.0 + p2pHeight * i,
+                x1 = (guiLeft + GUI_WIDTH).toDouble(),
+                y1 = guiTop + 60.0 + p2pHeight * (i + 1),
                 u0 = 0.0, v0 = 60.0 / GUI_TEX_HEIGHT,
                 u1 = 1.0, v1 = 102.0 / GUI_TEX_HEIGHT)
         }
         // Draw Bottom
-        drawTexturedQuad(tessellator, guiLeft.toDouble(), guiTop + ySize - 98.0,
-            (guiLeft + GUI_WIDTH).toDouble(), (guiTop + ySize).toDouble(),
+        drawTexturedQuad(tessellator,
+            x0 = guiLeft.toDouble(),
+            y0 = guiTop + ySize - 98.0,
+            x1 = (guiLeft + GUI_WIDTH).toDouble(),
+            y1 = (guiTop + ySize).toDouble(),
             u0 = 0.0, v0 = 102.0 / GUI_TEX_HEIGHT,
             u1 = 1.0, v1 = 200.0 / GUI_TEX_HEIGHT)
     }

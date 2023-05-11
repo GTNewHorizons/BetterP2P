@@ -45,7 +45,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
             }
             GL11.glColor3f(255f, 255f, 255f)
             // Draw our icons...
-            drawIcon(gui, info.icon, info.overlay, x + 3, y + 3)
+            drawBlockIcon(gui.mc, info.icon, info.overlay, x + 3, y + 3)
             gui.bindTexture(gui.BACKGROUND)
             if (info.output) {
                 drawTexturedQuad(Tessellator.instance, x.toDouble(), y + 4.0, x + 16.0, y + 20.0,
@@ -107,28 +107,5 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
         }
     }
 
-    private fun drawIcon(gui: GuiAdvancedMemoryCard, icon: IIcon, overlay: IIcon, x: Int, y: Int) {
-        val tessellator = Tessellator.instance
-        gui.bindTexture(gui.mc.renderEngine.getResourceLocation(0))
-        GL11.glPushAttrib(GL11.GL_BLEND or GL11.GL_TEXTURE_2D or GL11.GL_COLOR)
-        GL11.glEnable(GL11.GL_BLEND)
-        GL11.glEnable(GL11.GL_TEXTURE_2D)
-        GL11.glColor3f(255f, 255f, 255f)
-        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0)
-        drawTexturedQuad(tessellator,
-            x0 = x.toDouble() + 1,
-            y0 = y.toDouble() + 1,
-            x1 = x + 15.0,
-            y1 = y + 15.0,
-            u0 = icon.minU.toDouble(), v0 = icon.minV.toDouble(),
-            u1 = icon.maxU.toDouble(), v1 = icon.maxV.toDouble())
-        drawTexturedQuad(tessellator,
-            x0 = x.toDouble(),
-            y0 = y.toDouble(),
-            x1 = x + 16.0,
-            y1 = y + 16.0,
-            u0 = overlay.minU.toDouble(), v0 = overlay.minV.toDouble(),
-            u1 = overlay.maxU.toDouble(), v1 = overlay.maxV.toDouble())
-        GL11.glPopAttrib()
-    }
+
 }
