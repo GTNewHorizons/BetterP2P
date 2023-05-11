@@ -15,13 +15,11 @@ import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import com.projecturanus.betterp2p.item.MAX_TOOLTIP_LENGTH
 import com.projecturanus.betterp2p.network.*
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
-import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.resources.I18n
-import net.minecraft.init.Blocks
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse

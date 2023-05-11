@@ -1,7 +1,5 @@
 package com.projecturanus.betterp2p.item
 
-import com.projecturanus.betterp2p.client.gui.fmtTooltips
-
 const val MAX_TOOLTIP_LENGTH = 40
 
 enum class BetterMemoryCardModes(val unlocalizedName: String, vararg val unlocalizedDesc: String) {

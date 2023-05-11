@@ -49,12 +49,3 @@ class P2PStatus(val grid: IGrid, val player: EntityPlayer, type: Int) {
         }
     }
 }
-
-fun areP2PEqual(a: PartP2PTunnel<*>?, b: PartP2PTunnel<*>?): Boolean {
-    if (a == b) {
-        return true;
-    } else if(a != null && b != null) {
-        return hashP2P(a) == hashP2P(b)
-    }
-    return false;
-}
