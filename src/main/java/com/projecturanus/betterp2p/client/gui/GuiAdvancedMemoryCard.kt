@@ -177,9 +177,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
             init {
                 hoverText = if (type == null) {
-                    listOf("Any")
+                    mutableListOf(I18n.format("gui.advanced_memory_card.types.any"))
                 } else {
-                    listOf(type!!.stack.displayName)
+                    mutableListOf(
+                        I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName))
                 }
             }
 
@@ -201,12 +202,12 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                     } else {
                         type = nextType(false)
                     }
-                    hoverText =
-                        if (type == null) {
-                            listOf("Any")
-                        } else {
-                            listOf(type!!.stack.displayName)
-                        }
+                    if (type == null) {
+                        (hoverText as MutableList)[0] = I18n.format("gui.advanced_memory_card.types.any")
+                    } else {
+                        (hoverText as MutableList)[0] =
+                            I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName)
+                    }
                     requestRefresh()
                     super.func_146113_a(mc.soundHandler)
                 }

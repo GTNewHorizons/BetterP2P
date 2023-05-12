@@ -42,3 +42,5 @@ gui.advanced_memory_card.p2p_status.unbound=Unbound
 gui.advanced_memory_card.p2p_status.input=Input
 gui.advanced_memory_card.p2p_status.output=Output
 gui.advanced_memory_card.p2p_status.offline=Offline
+gui.advanced_memory_card.types.filtered=Showing: %s
+gui.advanced_memory_card.types.any=Showing: §aAll
