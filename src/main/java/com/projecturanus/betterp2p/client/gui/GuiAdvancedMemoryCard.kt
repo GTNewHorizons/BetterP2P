@@ -81,7 +81,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             "§6@out§7 - " + I18n.format("gui.advanced_memory_card.sortinfo3"),
             "§a@b§7 - " + I18n.format("gui.advanced_memory_card.sortinfo4"),
             "§c@u§7 - " + I18n.format("gui.advanced_memory_card.sortinfo5"),
-            "§7" + I18n.format("gui.advanced_memory_card.sortinfo6")
+            "§e@type=<name1>[;<name2>;]...§7 - " + I18n.format("gui.advanced_memory_card.sortinfo6"),
+            "§7" + I18n.format("gui.advanced_memory_card.sortinfo7")
         )
     }
 

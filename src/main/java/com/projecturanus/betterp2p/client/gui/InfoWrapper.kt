@@ -31,6 +31,7 @@ class InfoWrapper(info: P2PInfo) {
     val dim: Int = info.world
     val facing: ForgeDirection = info.facing
     val output: Boolean = info.output
+    val type: Int = info.type
 
     /**
      * The backing icon (quartz, iron, etc)
