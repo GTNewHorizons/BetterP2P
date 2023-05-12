@@ -17,5 +17,6 @@ object ModNetwork {
         channel.registerMessage(ServerTransportHandler::class.java, C2STransportPlayer::class.java, 5, Side.SERVER)
         channel.registerMessage(ServerRenameP2PTunnel::class.java, C2SP2PTunnelInfo::class.java, 6, Side.SERVER)
         channel.registerMessage(ServerRefreshP2PListHandler::class.java, C2SRefreshP2PList::class.java, 7, Side.SERVER)
+        channel.registerMessage(ServerUnlinkP2PHandler::class.java, C2SUnlinkP2P::class.java, 8, Side.SERVER)
     }
 }

@@ -135,6 +135,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                     title = BetterMemoryCardModes.COPY.unlocalizedName,
                     keys = BetterMemoryCardModes.COPY.unlocalizedDesc,
                     maxChars = MAX_TOOLTIP_LENGTH,
+                ),
+                fmtTooltips(
+                    title = BetterMemoryCardModes.UNBIND.unlocalizedName,
+                    keys = BetterMemoryCardModes.UNBIND.unlocalizedDesc,
+                    maxChars = MAX_TOOLTIP_LENGTH,
                 )
             )
 
@@ -144,7 +149,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
             override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
-                    mode = mode.next()
+                    mode = when (button) {
+                        0 -> mode.next()
+                        1 -> mode.next(true)
+                        else -> return
+                    }
                     hoverText = modeDescriptions[mode.ordinal]
                     setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
                     syncMemoryInfo()
@@ -176,10 +185,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             private fun nextType(reverse: Boolean): ClientTunnelInfo? {
                 // range: [0, types.size]
                 return if (reverse) {
-                    index = (index - 1).rem(types.size + 1)
+                    index = (index - 1).mod(types.size + 1)
                     types.getOrNull(index) as? ClientTunnelInfo
                 } else {
-                    index = (index + 1).rem(types.size + 1)
+                    index = (index + 1).mod(types.size + 1)
                     types.getOrNull(index) as? ClientTunnelInfo
                 }
             }
@@ -276,6 +285,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         infos.refresh()
         checkInfo()
         refreshOverlay()
+        col.entries.forEach { it.updateButtonVisibility() }
     }
 
     private fun checkInfo() {
@@ -481,6 +491,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     public override fun drawHoveringText(textLines: List<Any?>?, x: Int, y: Int, font: FontRenderer?) {
         super.drawHoveringText(textLines, x, y, font)
+    }
+
+    fun getTypeID(): Int {
+        return type?.index ?: TUNNEL_ANY
     }
 }
 

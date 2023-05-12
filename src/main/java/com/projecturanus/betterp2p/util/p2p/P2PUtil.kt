@@ -23,8 +23,8 @@ import net.minecraftforge.common.util.ForgeDirection
 
 fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P2PStatus) : Pair<PartP2PTunnel<*>, PartP2PTunnel<*>>? {
     // If these calls mess up we have bigger problems...
-    val input = status.listP2P[inputIndex]!!
-    var output = status.listP2P[outputIndex]!!
+    val input = status.listP2P[inputIndex] ?: return null
+    var output = status.listP2P[outputIndex] ?: return null
 
     val grid: IGrid? = input.gridNode?.grid
     if (grid is ISecurityGrid) {
@@ -116,6 +116,23 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
         Platform.spawnDrops(player.worldObj, output.location.x, output.location.y, output.location.z, dropItems)
     }
     return inputResult to outputResult
+}
+
+fun unlinkP2P(player: EntityPlayer, p2pIndex: Long, status: P2PStatus): PartP2PTunnel<*>? {
+    if (status.grid is ISecurityGrid) {
+        if (!status.grid.hasPermission(player, SecurityPermissions.BUILD) ||
+                !status.grid.hasPermission(player, SecurityPermissions.SECURITY)) {
+            return null
+        }
+    }
+    val tunnel = status.listP2P[p2pIndex] ?: return null
+    val oldFreq = tunnel.frequency
+    if (oldFreq == 0L) {
+        return tunnel
+    }
+
+    updateP2P(tunnel, 0L, false, player, tunnel.customName)
+    return tunnel
 }
 
 /**

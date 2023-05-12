@@ -25,6 +25,37 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
     private val selectedInfo: InfoWrapper?
         get() = selectedInfoProperty.get()
 
+    /**
+     * Update the button visibility
+     */
+    fun updateButtonVisibility() {
+        val info = infoSupplier() ?: return
+        val mode = modeSupplier()
+        if (selectedInfo == null) {
+            // No selected, so we don't show buttons
+            info.bindButton.enabled = false
+            info.unbindButton.enabled = false
+        } else if (mode == BetterMemoryCardModes.UNBIND) {
+            // Only unbinds allowed in unbind mode
+            info.bindButton.enabled = false
+            info.unbindButton.enabled = info.frequency != 0L
+        } else if (mode == BetterMemoryCardModes.COPY &&
+            ((!info.output && info.frequency != 0L) || selectedInfo!!.output)) {
+            // Copy mode
+            // If this info is (input && set freq) || selected info is an output
+            // Disable all buttons
+            info.bindButton.enabled = false
+            info.unbindButton.enabled = false
+        } else {
+            // Other modes:
+            // Bind allowed only if currently not selected && selected is unbound; OR not bound to selected
+            info.bindButton.enabled = info.code != selectedInfo!!.code &&
+                    (selectedInfo!!.frequency == 0L ||
+                    info.frequency != selectedInfo!!.frequency)
+            info.unbindButton.enabled = false
+        }
+    }
+
     fun render(gui: GuiAdvancedMemoryCard, mouseX: Int, mouseY: Int, partialTicks: Float) {
         val info = infoSupplier()
         if (info != null) {
@@ -72,17 +103,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
             if (info.channels != null) {
                 fontRenderer.drawString(info.channels, leftAlign, y + 33, 0)
             }
-            if (selectedInfo == null) {
-                info.bindButton.enabled = false
-            } else {
-                info.bindButton.enabled = info.code != selectedInfo?.code
-            }
-
-            val mode = modeSupplier()
-            if (mode == BetterMemoryCardModes.COPY && (!info.output && info.frequency != 0.toLong()) ||
-                    selectedInfo?.output == true) {
-                info.bindButton.enabled = false
-            }
+            updateButtonVisibility()
             drawButtons(gui, info, mouseX, mouseY, partialTicks)
         }
     }
@@ -92,19 +113,18 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
         info.renameButton.width = 120
         info.renameButton.yPosition = y + 1
         info.renameButton.height = 12
-        if (!info.bindButton.enabled) {
-            info.bindButton.enabled = false
-        } else if (info.bindButton.enabled) {
+        if (info.bindButton.enabled) {
             info.bindButton.enabled = true
             info.bindButton.xPosition = x + 190
             info.bindButton.width = 56
             info.bindButton.yPosition = y + 14
             info.bindButton.drawButton(gui.mc, mouseX, mouseY)
-        } else if (!info.bindButton.enabled) {
-            // TODO Unbind
-            info.bindButton.enabled = false
+        } else if (info.unbindButton.enabled) {
+            info.unbindButton.enabled = true
+            info.unbindButton.xPosition = x + 190
+            info.unbindButton.width = 56
+            info.unbindButton.yPosition = y + 14
+            info.unbindButton.drawButton(gui.mc, mouseX, mouseY)
         }
     }
-
-
 }

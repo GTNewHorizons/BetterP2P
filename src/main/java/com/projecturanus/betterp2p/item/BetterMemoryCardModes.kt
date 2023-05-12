@@ -29,9 +29,19 @@ enum class BetterMemoryCardModes(val unlocalizedName: String, vararg val unlocal
         "gui.advanced_memory_card.mode.copy.desc.2",
         "gui.advanced_memory_card.mode.copy.desc.3",
         "gui.advanced_memory_card.mode.copy.desc.4",
-    );
+    ),
 
-    fun next(): BetterMemoryCardModes {
-        return values()[ordinal.plus(1) % values().size]
+    /**
+     * Unbind/reset frequencies
+     */
+    UNBIND("gui.advanced_memory_card.mode.unbind",
+        "gui.advanced_memory_card.mode.unbind.desc.1",
+        "gui.advanced_memory_card.mode.unbind.desc.2");
+
+    fun next(reverse: Boolean = false): BetterMemoryCardModes {
+        if (reverse) {
+            return values()[(ordinal - 1).mod(values().size)]
+        }
+        return values()[(ordinal + 1).mod(values().size)]
     }
 }

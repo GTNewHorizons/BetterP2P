@@ -111,8 +111,18 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
                 if (input != null)
                     ModNetwork.channel.sendToServer(C2SLinkP2P(input.code, info.code))
             }
+            else -> {
+                BetterP2P.logger.debug("Somehow bind button was pressed while in UNBIND mode.")
+            }
         }
         info.bindButton.func_146113_a(gui.mc.soundHandler)
+    }
+
+    private fun onUnbindButtonClicked(info: InfoWrapper) {
+        if (info.frequency != 0L) {
+            ModNetwork.channel.sendToServer(C2SUnlinkP2P(info.code, gui.getTypeID()))
+            info.frequency = 0L
+        }
     }
 
     private fun findInput(frequency: Long?) =
@@ -120,10 +130,12 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
 
     fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         var clickRenameButton = false
-        for ((index,widget) in entries.withIndex()) {
+        for ((index, widget) in entries.withIndex()) {
             val info = widget.infoSupplier()
             if (info?.bindButton?.mousePressed(gui.mc, mouseX, mouseY) == true) {
                 onBindButtonClicked(widget.infoSupplier()!!)
+            } else if (info?.unbindButton?.mousePressed(gui.mc, mouseX, mouseY) == true) {
+                onUnbindButtonClicked(widget.infoSupplier()!!)
             } else if (mouseX > widget.x.toDouble() + 50 && mouseX < widget.x.toDouble() + 50 + 160 &&
                        mouseY > widget.y.toDouble() + 1 && mouseY < widget.y + 1 + 13 &&
                        widget.infoSupplier() != null) {
@@ -134,9 +146,8 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
                 onRenameButtonClicked(widget.infoSupplier()!!, index)
                 clickRenameButton = true
             } else if (mouseX > widget.x && mouseX < widget.x + P2PEntryConstants.WIDTH &&
-                mouseY > widget.y && mouseY < widget.y + P2PEntryConstants.HEIGHT &&
-                info != null && selectedInfo.get() != info
-                ) {
+                       mouseY > widget.y && mouseY < widget.y + P2PEntryConstants.HEIGHT &&
+                       info != null && selectedInfo.get() != info) {
                 onSelectButtonClicked(info)
             }
         }

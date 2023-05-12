@@ -75,6 +75,7 @@ class InfoWrapper(info: P2PInfo) {
     // Widgets
     val bindButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.bind"))
     val renameButton = GuiButton(0, 0, 0, 0, 0,"")
+    val unbindButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.unbind"))
 
     init {
         val p2pType: ClientTunnelInfo = BetterP2P.proxy.getP2PFromIndex(info.type) as ClientTunnelInfo

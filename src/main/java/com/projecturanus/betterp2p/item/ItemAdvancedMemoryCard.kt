@@ -83,13 +83,13 @@ object ItemAdvancedMemoryCard : Item() {
                     info.selectedEntry = hashP2P(part)
                 } else {
                     type = TUNNEL_ANY
-                    if (part != null) {
+                    status = if (part != null) {
                         // If we have a PartP2PTunnelME, it looks at the P2P grid node,
                         // so we should use the part instead.
-                        status = P2PStatus(part.gridNode.grid, player, type)
+                        P2PStatus(part.gridNode.grid, player, type)
                     } else {
                         // Fall back to the tile entity.
-                        status = P2PStatus(te.getGridNode(ForgeDirection.getOrientation(side)).grid, player, type)
+                        P2PStatus(te.getGridNode(ForgeDirection.getOrientation(side)).grid, player, type)
                     }
                     info.selectedEntry = NONE_SELECTED
                 }
