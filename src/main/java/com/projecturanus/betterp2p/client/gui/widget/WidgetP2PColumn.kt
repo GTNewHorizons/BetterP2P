@@ -38,9 +38,9 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
     fun resize(scale: GuiScale, availableHeight: Int) {
         entries.clear()
         for (i in 0 until scale.size(availableHeight)) {
-            val widget = WidgetP2PDevice( selectedInfo, mode,
+            val widget = WidgetP2PDevice(selectedInfo, mode,
                 { infos.filtered.getOrNull(i + scrollBar.currentScroll) },
-                x, y + i * (P2PEntryConstants.HEIGHT + 1))
+                gui, x, y + i * (P2PEntryConstants.HEIGHT + 1))
             entries.add(widget)
         }
     }
@@ -90,8 +90,12 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         renameBar.info = info
     }
 
-    private fun onSelectButtonClicked(info: InfoWrapper) {
-        gui.selectInfo(info.code)
+    private fun onSelectButtonClicked(widget: WidgetP2PDevice, info: InfoWrapper, mouseButton: Int) {
+        if (mouseButton == 1) {
+            gui.openTypeSelector(widget, false)
+        } else if (selectedInfo.get() != info) {
+            gui.selectInfo(info.code)
+        }
         info.bindButton.func_146113_a(gui.mc.soundHandler)
     }
 
@@ -150,8 +154,8 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
                 clickRenameButton = true
             } else if (mouseX > widget.x && mouseX < widget.x + P2PEntryConstants.WIDTH &&
                        mouseY > widget.y && mouseY < widget.y + P2PEntryConstants.HEIGHT &&
-                       info != null && selectedInfo.get() != info) {
-                onSelectButtonClicked(info)
+                       info != null) {
+                onSelectButtonClicked(widget, info, mouseButton)
             }
         }
         renameBar.mouseClicked(mouseX,mouseY,mouseButton)
@@ -192,9 +196,9 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         return false
     }
 
-    fun render(gui: GuiAdvancedMemoryCard, mouseX: Int, mouseY: Int, partialTicks: Float) {
+    fun render(mouseX: Int, mouseY: Int, partialTicks: Float) {
         for (widget in entries) {
-            widget.render(gui, mouseX, mouseY, partialTicks)
+            widget.render(mouseX, mouseY, partialTicks)
         }
         renameBar.drawTextBox()
     }

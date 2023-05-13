@@ -1,6 +1,8 @@
 package com.projecturanus.betterp2p.client.gui
 
 import appeng.client.gui.widgets.MEGuiTextField
+import appeng.parts.p2p.PartP2PGT5Power
+import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PLiquids
 import appeng.parts.p2p.PartP2PRedstone
 import appeng.parts.p2p.PartP2PTunnelME
@@ -15,6 +17,7 @@ import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import com.projecturanus.betterp2p.item.MAX_TOOLTIP_LENGTH
 import com.projecturanus.betterp2p.network.*
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
+import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiScreen
@@ -29,12 +32,7 @@ const val GUI_WIDTH = 288
 const val GUI_TEX_HEIGHT = 264
 class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
-    private lateinit var _guiLeft: Lazy<Int>
-    private var guiLeft: Int
-        get() = _guiLeft.value
-        set(value) {
-            _guiLeft = lazyOf(value)
-        }
+    private var guiLeft: Int = 0
 
     private lateinit var _guiTop: Lazy<Int>
     private var guiTop: Int
@@ -68,6 +66,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private val searchBar: MEGuiTextField
 
     private val infos = InfoList(msg.infos.map(::InfoWrapper), ::searchText)
+
+    private val typeSelector: WidgetTypeSelector
 
     private val searchText: String
         get() = searchBar.text
@@ -163,7 +163,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             }
         }
 
-        typeButton = object: WidgetButton(this, 0, 0, 32, 32) {
+        typeButton = object: WidgetButton(this, 0, 0, 32, 32), ITypeReceiver {
             val types = BetterP2P.proxy.getP2PTypeList()
             private var index =
                 if (type != null) {
@@ -177,7 +177,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
             init {
                 hoverText = if (type == null) {
-                    mutableListOf(I18n.format("gui.advanced_memory_card.types.any"))
+                    mutableListOf(
+                        I18n.format("gui.advanced_memory_card.types.filtered",
+                            I18n.format("gui.advanced_memory_card.types.any")))
                 } else {
                     mutableListOf(
                         I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName))
@@ -199,17 +201,12 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     if (button == 1) {
                         // open type selector?
+                        openTypeSelector(this, true)
+                        return
                     } else {
                         type = nextType(false)
                     }
-                    if (type == null) {
-                        (hoverText as MutableList)[0] = I18n.format("gui.advanced_memory_card.types.any")
-                    } else {
-                        (hoverText as MutableList)[0] =
-                            I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName)
-                    }
-                    ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
-                    super.func_146113_a(mc.soundHandler)
+                    commitType()
                 }
             }
 
@@ -240,6 +237,32 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                         height = 18.0)
                 }
             }
+
+            private fun commitType() {
+                if (type == null) {
+                    (hoverText as MutableList)[0] = I18n.format("gui.advanced_memory_card.types.any")
+                } else {
+                    (hoverText as MutableList)[0] =
+                            I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName)
+                }
+                ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
+                super.func_146113_a(mc.soundHandler)
+            }
+
+            override fun accept(type: ClientTunnelInfo?) {
+                this.index = type?.index ?: TUNNEL_ANY
+                gui.type = type
+                commitType()
+                gui.closeTypeSelector()
+            }
+
+            override fun x(): Int {
+                return guiLeft
+            }
+
+            override fun y(): Int {
+                return this.yPosition
+            }
         }
 
         refreshButton = object: WidgetButton(this, 0, 0, 32, 32) {
@@ -249,6 +272,31 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 }
             }
         }
+
+        val typeSelectorList = mutableListOf<ClientTunnelInfo>()
+        var toAdd = BetterP2P.proxy.getP2PFromClass(PartP2PTunnelME::class.java) as? ClientTunnelInfo
+        if (toAdd != null) {
+            typeSelectorList.add(toAdd)
+        }
+        toAdd = BetterP2P.proxy.getP2PFromClass(PartP2PLiquids::class.java) as? ClientTunnelInfo
+        if (toAdd != null) {
+            typeSelectorList.add(toAdd)
+        }
+        toAdd = BetterP2P.proxy.getP2PFromClass(PartP2PGT5Power::class.java) as? ClientTunnelInfo
+        if (toAdd != null) {
+            typeSelectorList.add(toAdd)
+        }
+        toAdd = BetterP2P.proxy.getP2PFromClass(PartP2PInterface::class.java) as? ClientTunnelInfo
+        if (toAdd != null) {
+            typeSelectorList.add(toAdd)
+        }
+        BetterP2P.proxy.getP2PTypeList().forEach {
+            if (!typeSelectorList.contains(it)) {
+                typeSelectorList.add(it as ClientTunnelInfo)
+            }
+        }
+        typeSelector = WidgetTypeSelector(0, 0, typeSelectorList)
+        typeSelector.parent = typeButton
     }
 
     /**
@@ -295,10 +343,26 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         refreshButton.setTexCoords(32 * 5.0, 200.0)
         buttonList.add(refreshButton)
 
+        if (typeSelector.parent != typeButton) {
+            closeTypeSelector()
+        } else {
+            typeSelector.setPos(typeSelector.parent.x(), typeSelector.parent.y())
+        }
         infos.refresh()
         checkInfo()
         refreshOverlay()
         col.entries.forEach { it.updateButtonVisibility() }
+    }
+
+    fun openTypeSelector(parent: ITypeReceiver, useAny: Boolean) {
+        typeSelector.parent = parent
+        typeSelector.setPos(parent.x(), parent.y())
+        typeSelector.useAny = useAny
+        typeSelector.visible = true
+    }
+
+    fun closeTypeSelector() {
+        typeSelector.visible = false
     }
 
     private fun checkInfo() {
@@ -347,9 +411,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         GL11.glColor3f(255f, 255f, 255f)
         scrollBar.draw(this)
 
-        col.render(this, mouseX, mouseY, partialTicks)
+        col.render(mouseX, mouseY, partialTicks)
         // The GL state is already messed up here by string drawing but oh well
         GL11.glPopAttrib()
+        if (typeSelector.visible) {
+            typeSelector.render(this, mouseX, mouseY, partialTicks)
+            return
+        }
         var drewHoverText = false
         run finished@ {
             buttonList.forEach { it as WidgetButton
@@ -397,6 +465,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
+        if (typeSelector.visible) {
+            typeSelector.mousePressed(mouseX, mouseY, mouseButton)
+            return
+        }
         col.mouseClicked(mouseX, mouseY, mouseButton)
         scrollBar.click(mouseX, mouseY)
         buttonList.forEach {it as WidgetButton
@@ -474,6 +546,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     override fun keyTyped(char: Char, key: Int) {
+        if (key == Keyboard.KEY_ESCAPE && typeSelector.visible) {
+            closeTypeSelector()
+            return
+        }
         if (key == Keyboard.KEY_LSHIFT || col.keyTyped(char, key)) return
         if (!(char.isWhitespace() && searchBar.text.isEmpty()) && searchBar.textboxKeyTyped(char, key)){
             infos.refilter()

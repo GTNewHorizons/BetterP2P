@@ -36,26 +36,7 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     // TODO Change to exception
     if (input.javaClass != output.javaClass) {
         //change output to input
-        val host = output.host
-        host.removePart(output.side, false)
-        val dir = host.addPart(input.getItemStack(PartItemStack.Wrench), output.side, player)
-        val newPart = host.getPart(dir)
-        if (newPart is PartP2PTunnel<*>) {
-            newPart.outputProperty = true
-            newPart.onTunnelNetworkChange()
-            try {
-                val p2p: P2PCache = newPart.proxy.p2P
-                p2p.updateFreq(newPart, output.frequency)
-                output = newPart
-            } catch (e: GridAccessException) {
-                // :P
-            }
-
-            println("part changed")
-        } else {
-            // error
-            return null
-        }
+        changeP2P(output, BetterP2P.proxy.getP2PFromClass(input.javaClass)!!, player)
     }
     if (input == output) {
         // Network loop
@@ -135,6 +116,64 @@ fun unlinkP2P(player: EntityPlayer, p2pIndex: Long, status: P2PStatus): PartP2PT
     return tunnel
 }
 
+/**
+ * Converts one P2P into the type
+ */
+fun changeP2P(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityPlayer): PartP2PTunnel<*>? {
+    val grid = tunnel.gridNode.grid
+    if (grid is ISecurityGrid) {
+        if (!grid.hasPermission(player, SecurityPermissions.BUILD) ||
+                !grid.hasPermission(player, SecurityPermissions.SECURITY)) {
+            return null
+        }
+    }
+    if (BetterP2P.proxy.getP2PFromClass(tunnel.javaClass) == newType) {
+        return null
+    }
+    val host = tunnel.host
+    host.removePart(tunnel.side, false)
+    val dir = host.addPart(newType.stack, tunnel.side, player)
+    val newPart = host.getPart(dir)
+    if (newPart is PartP2PTunnel<*>) {
+        newPart.outputProperty = tunnel.isOutput
+        try {
+            val p2p: P2PCache = newPart.proxy.p2P
+            p2p.updateFreq(newPart, tunnel.frequency)
+            return newPart
+        } catch (e: GridAccessException) {
+            // :P
+        }
+    }
+    return null
+}
+
+/**
+ * Converts all connected P2Ps to a new type
+ */
+fun changeAllP2Ps(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityPlayer): Boolean {
+    val grid = tunnel.gridNode.grid
+    if (grid is ISecurityGrid) {
+        if (!grid.hasPermission(player, SecurityPermissions.BUILD) ||
+                !grid.hasPermission(player, SecurityPermissions.SECURITY)) {
+            return false
+        }
+    }
+    try {
+        if (tunnel.isOutput && tunnel.input != null) {
+            return changeAllP2Ps(tunnel.input, newType, player)
+        } else {
+            val outputs = tunnel.outputs.toMutableList()
+            changeP2P(tunnel, newType, player)
+            for (o in outputs) {
+                changeP2P(o, newType, player)
+            }
+            return true
+        }
+    } catch (e: GridAccessException) {
+        // :P
+    }
+    return false
+}
 /**
  * Due to Applied Energistics' limit
  */

@@ -28,6 +28,7 @@ object ModNetwork {
         channel.registerMessage(ServerRenameP2PTunnel::class.java, C2SP2PTunnelInfo::class.java, 6, Side.SERVER)
         channel.registerMessage(ServerRefreshP2PListHandler::class.java, C2SRefreshP2PList::class.java, 7, Side.SERVER)
         channel.registerMessage(ServerUnlinkP2PHandler::class.java, C2SUnlinkP2P::class.java, 8, Side.SERVER)
+        channel.registerMessage(ServerTypeChangeHandler::class.java, C2STypeChange::class.java, 9, Side.SERVER)
         networkWorker = ScheduledThreadPoolExecutor(1, ThreadFactory {
             val th = Thread(it)
             th.name = "BetterP2P-NetworkWorker"

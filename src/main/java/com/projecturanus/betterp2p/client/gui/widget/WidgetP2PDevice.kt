@@ -1,7 +1,12 @@
 package com.projecturanus.betterp2p.client.gui.widget
 
+import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.client.gui.*
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
+import com.projecturanus.betterp2p.network.C2STypeChange
+import com.projecturanus.betterp2p.network.ModNetwork
+import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
+import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.resources.I18n
@@ -18,7 +23,11 @@ object P2PEntryConstants {
     const val LEFT_ALIGN = 24
 }
 
-class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>, val modeSupplier: () -> BetterMemoryCardModes, val infoSupplier: () -> InfoWrapper?, var x: Int, var y: Int): Widget() {
+class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>,
+                      val modeSupplier: () -> BetterMemoryCardModes,
+                      val infoSupplier: () -> InfoWrapper?,
+                      val gui: GuiAdvancedMemoryCard,
+                      var x: Int, var y: Int): Widget(), ITypeReceiver {
 
     var renderNameTextField = true
 
@@ -56,7 +65,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
         }
     }
 
-    fun render(gui: GuiAdvancedMemoryCard, mouseX: Int, mouseY: Int, partialTicks: Float) {
+    fun render(mouseX: Int, mouseY: Int, partialTicks: Float) {
         val info = infoSupplier()
         if (info != null) {
             // Draw the background first
@@ -126,5 +135,18 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
             info.unbindButton.yPosition = y + 14
             info.unbindButton.drawButton(gui.mc, mouseX, mouseY)
         }
+    }
+
+    override fun accept(type: ClientTunnelInfo?) {
+        ModNetwork.channel.sendToServer(C2STypeChange(type?.index ?: TUNNEL_ANY, infoSupplier()!!.code))
+        gui.closeTypeSelector()
+    }
+
+    override fun x(): Int {
+        return this.x + 40
+    }
+
+    override fun y(): Int {
+        return this.y
     }
 }
