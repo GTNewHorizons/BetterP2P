@@ -36,7 +36,7 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     // TODO Change to exception
     if (input.javaClass != output.javaClass) {
         //change output to input
-        changeP2P(output, BetterP2P.proxy.getP2PFromClass(input.javaClass)!!, player)
+        output = changeP2P(output, BetterP2P.proxy.getP2PFromClass(input.javaClass)!!, player) ?: return null
     }
     if (input == output) {
         // Network loop
@@ -129,6 +129,13 @@ fun changeP2P(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityPlaye
     }
     if (BetterP2P.proxy.getP2PFromClass(tunnel.javaClass) == newType) {
         return null
+    }
+    if (tunnel is PartP2PInterface) {
+        // For output, drop items.
+        val dropItems = mutableListOf<ItemStack>()
+        val patternsOut = tunnel.interfaceDuality.patterns as AppEngInternalInventory
+        dropItems.addAll(patternsOut)
+        Platform.spawnDrops(player.worldObj, tunnel.location.x, tunnel.location.y, tunnel.location.z, dropItems)
     }
     val host = tunnel.host
     host.removePart(tunnel.side, false)

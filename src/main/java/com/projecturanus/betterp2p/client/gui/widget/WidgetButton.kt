@@ -25,7 +25,7 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
     private var texY = 0.0
     var hoverText: List<String> = listOf()
 
-    abstract fun mousePressed(mouseX: Int, mouseY: Int, button: Int)
+    abstract fun mousePressed(mouseX: Int, mouseY: Int, button: Int): Boolean
 
     open fun draw(mc: Minecraft, mouseX: Int, mouseY: Int, partialTicks: Float) {
         val tessellator = Tessellator.instance

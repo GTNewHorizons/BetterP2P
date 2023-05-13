@@ -97,7 +97,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             ::selectedInfo, ::mode, scrollBar)
         searchBar = MEGuiTextField(100, 10)
         resizeButton = object: WidgetButton(this, 0, 0, 32, 32) {
-            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int): Boolean {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     if (button == 0) {
                         scale = when (scale) {
@@ -116,7 +116,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                     }
                     initGui()
                     super.func_146113_a(mc.soundHandler)
+                    return true
                 }
+                return false
             }
         }
 
@@ -148,18 +150,20 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 hoverText = modeDescriptions[mode.ordinal]
             }
 
-            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int): Boolean {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     mode = when (button) {
                         0 -> mode.next()
                         1 -> mode.next(true)
-                        else -> return
+                        else -> return false
                     }
                     hoverText = modeDescriptions[mode.ordinal]
                     setTexCoords((mode.ordinal + 3) * 32.0, 232.0)
                     syncMemoryInfo()
                     super.func_146113_a(mc.soundHandler)
+                    return true
                 }
+                return false
             }
         }
 
@@ -197,17 +201,19 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 }
             }
 
-            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int): Boolean {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     if (button == 1) {
                         // open type selector?
                         openTypeSelector(this, true)
-                        return
+                        return true
                     } else {
                         type = nextType(false)
                     }
                     commitType()
+                    return true
                 }
+                return false
             }
 
             override fun draw(mc: Minecraft, mouseX: Int, mouseY: Int, partialTicks: Float) {
@@ -266,10 +272,12 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         }
 
         refreshButton = object: WidgetButton(this, 0, 0, 32, 32) {
-            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int): Boolean {
                 if (super.mousePressed(mc, mouseX, mouseY)) {
                     ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
+                    return true
                 }
+                return false
             }
         }
 
@@ -471,8 +479,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         }
         col.mouseClicked(mouseX, mouseY, mouseButton)
         scrollBar.click(mouseX, mouseY)
-        buttonList.forEach {it as WidgetButton
-            it.mousePressed(mouseX, mouseY, mouseButton)
+        for (button in buttonList) {
+            button as WidgetButton
+            if (button.mousePressed(mouseX, mouseY, mouseButton)) {
+                return
+            }
         }
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         if (mouseButton == 1 && searchBar.isMouseIn(mouseX, mouseY)) {
