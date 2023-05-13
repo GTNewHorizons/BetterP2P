@@ -4,11 +4,9 @@ import appeng.api.parts.IPartHost
 import appeng.parts.p2p.PartP2PTunnel
 import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard
 import com.projecturanus.betterp2p.util.p2p.P2PCache
-import com.projecturanus.betterp2p.util.p2p.toInfo
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
 import cpw.mods.fml.common.network.simpleimpl.MessageContext
-import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.world.World
 import net.minecraftforge.common.DimensionManager
@@ -25,10 +23,7 @@ class ServerRenameP2PTunnel : IMessageHandler<C2SP2PTunnelInfo, IMessage?> {
         if (te is IGridHost && te.getGridNode(ForgeDirection.getOrientation(message.info.side)) != null) {
             val p = (te as IPartHost).getPart(ForgeDirection.getOrientation(message.info.side)) as PartP2PTunnel<*>
             p.customName = message.info.name
-            ModNetwork.channel.sendTo(
-                S2CListP2P(cache.refresh(cache.lastP2PType).map { it.toInfo() },
-                ItemAdvancedMemoryCard.getInfo(cache.player.heldItem)),
-                cache.player as EntityPlayerMP)
+            ModNetwork.queueP2PListUpdate(cache, ctx.serverHandler.playerEntity, ItemAdvancedMemoryCard.getInfo(cache.player.heldItem))
         }
         return null
     }

@@ -125,8 +125,11 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         }
     }
 
-    private fun findInput(frequency: Long?) =
+    fun findInput(frequency: Long?) =
         infos.filtered.find { it.frequency == frequency && !it.output }
+
+    fun findOutput(frequency: Long?) =
+        infos.filtered.find { it.frequency == frequency && it.output }
 
     fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         var clickRenameButton = false

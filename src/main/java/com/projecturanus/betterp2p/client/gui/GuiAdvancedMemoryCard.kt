@@ -60,9 +60,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private val modeButton: WidgetButton
 
     private var type: ClientTunnelInfo? = BetterP2P.proxy.getP2PFromIndex(msg.memoryInfo.type) as? ClientTunnelInfo
-    private var typeCooldown: Long = System.currentTimeMillis()
-    private var typeUpdateReady: Boolean = true
     private val typeButton: WidgetButton
+
+    private val refreshButton: WidgetButton
 
     private val scrollBar: WidgetScrollBar
     private val searchBar: MEGuiTextField
@@ -208,7 +208,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                         (hoverText as MutableList)[0] =
                             I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName)
                     }
-                    requestRefresh()
+                    ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
                     super.func_146113_a(mc.soundHandler)
                 }
             }
@@ -238,6 +238,14 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                         y = this.yPosition + 2,
                         width = 18.0,
                         height = 18.0)
+                }
+            }
+        }
+
+        refreshButton = object: WidgetButton(this, 0, 0, 32, 32) {
+            override fun mousePressed(mouseX: Int, mouseY: Int, button: Int) {
+                if (super.mousePressed(mc, mouseX, mouseY)) {
+                    ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
                 }
             }
         }
@@ -281,8 +289,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         buttonList.add(modeButton)
 
         typeButton.setPosition(guiLeft - 32, guiTop + 66)
-        typeButton.setTexCoords(0.0, 200.0)
         buttonList.add(typeButton)
+
+        refreshButton.setPosition(guiLeft - 32, guiTop + 98)
+        refreshButton.setTexCoords(32 * 5.0, 200.0)
+        buttonList.add(refreshButton)
 
         infos.refresh()
         checkInfo()
@@ -291,26 +302,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     private fun checkInfo() {
-        infos.filtered.forEach { it.error = false }
         // A P2P entry is considered "errored" if it is an output, and has no inputs.
-        infos.filtered.groupBy { it.frequency }
-            .filter { it.value.none { x -> !x.output } }
-            .forEach { it.value.forEach {
-                info -> info.error = true
-        } }
-    }
-
-    /**
-     * Request a refresh from C->S.
-     * TODO: Implement
-     */
-    fun requestRefresh() {
-        // Let's make sure the server only gets the last request in the last 250 ms, so we don't get spammed.
-        val time = System.currentTimeMillis()
-        typeCooldown = time + 250
-        if (typeUpdateReady && time < typeCooldown) {
-            ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
-            typeUpdateReady = false
+        infos.filtered.forEach {
+            it.error = it.frequency != 0L && if (it.output) {
+                col.findInput(it.frequency) == null
+            } else {
+                col.findOutput(it.frequency) == null
+            }
         }
     }
 
@@ -369,10 +367,6 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
                 col.mouseHovered(mouseX, mouseY)
             }
         }
-        if (!typeUpdateReady && System.currentTimeMillis() > typeCooldown) {
-            typeUpdateReady = true
-            ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
-        }
     }
 
     /**
@@ -405,9 +399,9 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         col.mouseClicked(mouseX, mouseY, mouseButton)
         scrollBar.click(mouseX, mouseY)
-        modeButton.mousePressed(mouseX, mouseY, mouseButton)
-        resizeButton.mousePressed(mouseX, mouseY, mouseButton)
-        typeButton.mousePressed(mouseX, mouseY, mouseButton)
+        buttonList.forEach {it as WidgetButton
+            it.mousePressed(mouseX, mouseY, mouseButton)
+        }
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         if (mouseButton == 1 && searchBar.isMouseIn(mouseX, mouseY)) {
             this.searchBar.text = ""

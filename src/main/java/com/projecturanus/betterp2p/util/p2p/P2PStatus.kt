@@ -4,6 +4,7 @@ import appeng.api.networking.IGrid
 import appeng.parts.p2p.PartP2PTunnel
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.capability.TUNNEL_ANY
+import com.projecturanus.betterp2p.network.P2PInfo
 import com.projecturanus.betterp2p.network.hashP2P
 import com.projecturanus.betterp2p.util.listAllGridP2P
 import net.minecraft.entity.player.EntityPlayer
@@ -38,14 +39,16 @@ class P2PStatus(val grid: IGrid, val player: EntityPlayer, type: Int) {
      * @param type if TUNNEL_ANY or invalid, returns the full list; else
      *             filters the list to the targeted type
      */
-    fun refresh(type: Int): List<PartP2PTunnel<*>> {
+    fun refresh(type: Int): List<P2PInfo> {
         rebuildList()
         return if (type == TUNNEL_ANY) {
-            listP2P.values.toList()
+            listP2P.values.map { it.toInfo() }
         } else {
-            listP2P.values.filter {
-                (BetterP2P.proxy.getP2PFromClass(it.javaClass)?.index ?: TUNNEL_ANY) == type
-            }.toList()
+            listP2P.values.mapNotNull {
+                if ((BetterP2P.proxy.getP2PFromClass(it.javaClass)?.index ?: TUNNEL_ANY) == type) {
+                    it.toInfo()
+                } else null
+            }
         }
     }
 }

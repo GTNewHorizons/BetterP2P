@@ -97,7 +97,7 @@ class InfoList (initList: Collection<InfoWrapper>,
                     }
                     -(hits * hits) + name.length
                 }
-                else -> it.frequency + Short.MAX_VALUE
+                else -> it.frequency + Short.MAX_VALUE - (if (it.output) 0 else 1)
             }
         }
     }

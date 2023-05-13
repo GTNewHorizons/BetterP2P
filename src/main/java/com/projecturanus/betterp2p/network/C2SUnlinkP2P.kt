@@ -5,7 +5,6 @@ import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.util.listAllGridP2P
 import com.projecturanus.betterp2p.util.listTargetGridP2P
 import com.projecturanus.betterp2p.util.p2p.P2PCache
-import com.projecturanus.betterp2p.util.p2p.toInfo
 import com.projecturanus.betterp2p.util.p2p.unlinkP2P
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
@@ -43,6 +42,7 @@ class ServerUnlinkP2PHandler : IMessageHandler<C2SUnlinkP2P, S2CListP2P?> {
         } else {
             listAllGridP2P(status.grid, status.player)
         }
-        return S2CListP2P(status.refresh(status.lastP2PType).map { it.toInfo() })
+        ModNetwork.queueP2PListUpdate(status, ctx.serverHandler.playerEntity)
+        return null
     }
 }

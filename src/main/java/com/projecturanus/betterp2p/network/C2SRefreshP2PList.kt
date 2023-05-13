@@ -5,7 +5,6 @@ import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.util.listAllGridP2P
 import com.projecturanus.betterp2p.util.listTargetGridP2P
 import com.projecturanus.betterp2p.util.p2p.P2PCache
-import com.projecturanus.betterp2p.util.p2p.toInfo
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
 import cpw.mods.fml.common.network.simpleimpl.MessageContext
@@ -29,7 +28,7 @@ class C2SRefreshP2PList(var type: Int = TUNNEL_ANY): IMessage {
  * Client -> C2SRefreshP2P -> Server
  * Handler on server side
  */
-class ServerRefreshP2PListHandler : IMessageHandler<C2SRefreshP2PList, S2CListP2P?> {
+class ServerRefreshP2PListHandler : IMessageHandler<C2SRefreshP2PList, IMessage?> {
     override fun onMessage(message: C2SRefreshP2PList, ctx: MessageContext): S2CListP2P? {
         if (!P2PCache.statusMap.containsKey(ctx.serverHandler.playerEntity.uniqueID)) return null
         val status = P2PCache.statusMap[ctx.serverHandler.playerEntity.uniqueID]!!
@@ -40,6 +39,7 @@ class ServerRefreshP2PListHandler : IMessageHandler<C2SRefreshP2PList, S2CListP2
         } else {
             listAllGridP2P(status.grid, status.player)
         }
-        return S2CListP2P(status.refresh(status.lastP2PType).map { it.toInfo() })
+        ModNetwork.queueP2PListUpdate(status, ctx.serverHandler.playerEntity)
+        return null
     }
 }

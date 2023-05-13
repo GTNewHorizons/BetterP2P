@@ -16,7 +16,6 @@ import com.projecturanus.betterp2p.util.getPart
 import com.projecturanus.betterp2p.util.p2p.P2PCache
 import com.projecturanus.betterp2p.util.p2p.P2PStatus
 import com.projecturanus.betterp2p.util.p2p.getTypeIndex
-import com.projecturanus.betterp2p.util.p2p.toInfo
 import cpw.mods.fml.relauncher.Side
 import cpw.mods.fml.relauncher.SideOnly
 import net.minecraft.client.renderer.texture.IIconRegister
@@ -45,9 +44,7 @@ object ItemAdvancedMemoryCard : Item() {
 
     private fun sendStatus(status: P2PStatus, info: MemoryInfo, player: EntityPlayerMP) {
         P2PCache.statusMap[player.uniqueID] = status
-        ModNetwork.channel.sendTo(
-            S2CListP2P(status.refresh(info.type).map { it.toInfo() }, info),
-            player)
+        ModNetwork.channel.sendTo(S2CListP2P(status.refresh(info.type), info), player)
     }
 
     @SideOnly(Side.CLIENT)
