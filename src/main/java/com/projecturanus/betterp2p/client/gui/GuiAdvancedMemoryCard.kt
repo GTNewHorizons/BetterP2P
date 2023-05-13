@@ -246,10 +246,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
             private fun commitType() {
                 if (type == null) {
-                    (hoverText as MutableList)[0] = I18n.format("gui.advanced_memory_card.types.any")
+                    (hoverText as MutableList)[0] = I18n.format("gui.advanced_memory_card.types.filtered",
+                        I18n.format("gui.advanced_memory_card.types.any"))
                 } else {
                     (hoverText as MutableList)[0] =
-                            I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName)
+                        I18n.format("gui.advanced_memory_card.types.filtered", "§a" + type!!.stack.displayName)
                 }
                 ModNetwork.channel.sendToServer(C2SRefreshP2PList(type?.index ?: TUNNEL_ANY))
                 super.func_146113_a(mc.soundHandler)
