@@ -606,7 +606,7 @@ public class GlStateManager {
     }
 
     public static void glTexCoordPointer(int size, int type, int stride, int buffer_offset) {
-        GL11.glTexCoordPointer(size, type, stride, (long) buffer_offset);
+        GL11.glTexCoordPointer(size, type, stride, buffer_offset);
     }
 
     public static void glTexCoordPointer(int size, int type, int stride, ByteBuffer buffer) {
@@ -614,7 +614,7 @@ public class GlStateManager {
     }
 
     public static void glVertexPointer(int size, int type, int stride, int buffer_offset) {
-        GL11.glVertexPointer(size, type, stride, (long) buffer_offset);
+        GL11.glVertexPointer(size, type, stride, buffer_offset);
     }
 
     public static void glVertexPointer(int size, int type, int stride, ByteBuffer buffer) {
@@ -622,7 +622,7 @@ public class GlStateManager {
     }
 
     public static void glColorPointer(int size, int type, int stride, int buffer_offset) {
-        GL11.glColorPointer(size, type, stride, (long) buffer_offset);
+        GL11.glColorPointer(size, type, stride, buffer_offset);
     }
 
     public static void glColorPointer(int size, int type, int stride, ByteBuffer buffer) {
