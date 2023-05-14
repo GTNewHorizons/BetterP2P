@@ -15,14 +15,10 @@ import com.projecturanus.betterp2p.util.GlStateManager;
 import kotlin.Pair;
 
 /**
- * Everything in this inner class is From a mod that has MIT license owned by romelo333 and maintained by McJty
- *
- * License is here: https://github.com/romelo333/notenoughwands1.8.8/blob/master/LICENSE
- *
- * Specific source of code from the GenericWand class:
- * https://github.com/romelo333/notenoughwands1.8.8/blob/20952f50e7c1ab3fd676ed3da302666295e3cac8/src/main/java/romelo333/notenoughwands/Items/GenericWand.java
- *
- * Version 1.1: Edited to support rotation
+ * This class is based on the
+ * <a href="https://github.com/romelo333/notenoughwands1.8.8/blob/20952f50e7c1ab3fd676ed3da302666295e3cac8/src/main/java/romelo333/notenoughwands/Items/GenericWand.java">GenericWand</a>
+ * class from a mod with MIT license.
+ * <a href="https://github.com/romelo333/notenoughwands1.8.8/blob/master/LICENSE">Source license</a>
  */
 public class OutlineRenderer {
 
