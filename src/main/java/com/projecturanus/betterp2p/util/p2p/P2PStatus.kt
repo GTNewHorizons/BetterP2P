@@ -25,7 +25,6 @@ class P2PStatus(val grid: IGrid, val player: EntityPlayer, type: Int) {
      */
     var lastP2PType: Int = type
 
-
     /**
      * Refreshes the p2p list
      */

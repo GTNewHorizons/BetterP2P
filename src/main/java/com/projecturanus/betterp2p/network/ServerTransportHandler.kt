@@ -1,4 +1,4 @@
-package com.projecturanus.betterp2p.network;
+package com.projecturanus.betterp2p.network
 
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage
