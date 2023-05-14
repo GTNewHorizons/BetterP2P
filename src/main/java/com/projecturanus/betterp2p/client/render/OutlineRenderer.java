@@ -15,8 +15,8 @@ import com.projecturanus.betterp2p.util.GlStateManager;
 import kotlin.Pair;
 
 /**
- * This class is based on the
- * <a href="https://github.com/romelo333/notenoughwands1.8.8/blob/20952f50e7c1ab3fd676ed3da302666295e3cac8/src/main/java/romelo333/notenoughwands/Items/GenericWand.java">GenericWand</a>
+ * This class is based on the <a href=
+ * "https://github.com/romelo333/notenoughwands1.8.8/blob/20952f50e7c1ab3fd676ed3da302666295e3cac8/src/main/java/romelo333/notenoughwands/Items/GenericWand.java">GenericWand</a>
  * class from a mod with MIT license.
  * <a href="https://github.com/romelo333/notenoughwands1.8.8/blob/master/LICENSE">Source license</a>
  */

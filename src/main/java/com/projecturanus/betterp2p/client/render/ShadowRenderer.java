@@ -15,11 +15,10 @@ import org.lwjgl.opengl.GL11;
 import com.projecturanus.betterp2p.util.GlStateManager;
 
 /**
- * This class uses the code from BuildersGuides.
- * <a href="https://github.com/Ipsis/BuildersGuides">Source code</a>
- * <a href="https://github.com/Ipsis/BuildersGuides/blob/master/COPYING.LESSER">Source license</a>
- * In particular, two functions of
- * <a href="https://github.com/Ipsis/BuildersGuides/blob/master/src/main/java/ipsis/buildersguides/util/RenderUtils.java">RenderUtils</a>
+ * This class uses the code from BuildersGuides. <a href="https://github.com/Ipsis/BuildersGuides">Source code</a>
+ * <a href="https://github.com/Ipsis/BuildersGuides/blob/master/COPYING.LESSER">Source license</a> In particular, two
+ * functions of <a href=
+ * "https://github.com/Ipsis/BuildersGuides/blob/master/src/main/java/ipsis/buildersguides/util/RenderUtils.java">RenderUtils</a>
  * were used.
  */
 @SuppressWarnings("serial")
