@@ -45,10 +45,7 @@ public class OutlineRenderer {
 
     private static void renderOutlines(Collection<List<Integer>> coordinates, int r, int g, int b, int thickness) {
         Tessellator tessellator = Tessellator.instance;
-        // net.minecraft.client.renderer.VertexBuffer
-        // BufferBuilder buffer = tessellator.getBuffer();
         tessellator.startDrawing(GL11.GL_LINES);
-        // GlStateManager.color(r / 255.0f, g / 255.0f, b / 255.0f);
         GL11.glLineWidth(thickness);
         for (List<Integer> coordinate : coordinates) {
             float x = coordinate.get(0);
@@ -111,7 +108,6 @@ public class OutlineRenderer {
     private static void renderOutlinesWithFacing(Collection<Pair<List<Integer>, ForgeDirection>> coordinates, double x,
             double y, double z, int r, int g, int b, int thickness) {
         Tessellator tessellator = Tessellator.instance;
-        // BufferBuilder buffer = tessellator.getBuffer();
 
         for (Pair<List<Integer>, ForgeDirection> coordinate : coordinates) {
             List<Integer> pos = coordinate.component1();

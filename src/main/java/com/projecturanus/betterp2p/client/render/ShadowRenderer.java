@@ -48,9 +48,7 @@ public class ShadowRenderer {
         int xOffset = target.get(0) - pos.get(0);
         int yOffset = target.get(1) - pos.get(1);
         int zOffset = target.get(2) - pos.get(2);
-        // final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
         Tessellator tessellator = Tessellator.instance;
-        // BufferBuilder bufferBuilder = tessellator.getBuffer();
         GlStateManager.pushMatrix();
         // this first translate is to make relative to TE and everything
         GlStateManager.translate(relX + 0.5F, relY + 0.5F, relZ + 0.5F);
@@ -105,7 +103,6 @@ public class ShadowRenderer {
     private static void shadedCube(float scale) {
         float size = scale;
         Tessellator tessellator = Tessellator.instance;
-        // BufferBuilder worldRenderer = tessellator.getBuffer();
         // Front - anticlockwise vertices
         // Back - clockwise vertices
         tessellator.startDrawing(GL11.GL_QUADS);

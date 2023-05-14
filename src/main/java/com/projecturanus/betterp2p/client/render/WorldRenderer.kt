@@ -44,7 +44,6 @@ object WorldRenderer {
     fun shadedCube(scale: Float) {
         val size = 1.0 * scale
         val tessellator = Tessellator.instance
-        //val worldRenderer = tessellator.buffer
         // Front - anticlockwise vertices
         // Back - clockwise vertices
         tessellator.startDrawing(GL11.GL_QUADS)

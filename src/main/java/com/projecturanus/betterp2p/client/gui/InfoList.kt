@@ -53,12 +53,12 @@ class InfoList (initList: Collection<InfoWrapper>,
     fun resort() {
         sorted.sortBy {
             if (it.code == selectedEntry) {
-                -2 // Put the selected p2p in the front
+                -2 // Put the selected p2p at the front
                 // Non-Zero frequencies
             } else if (it.frequency != 0L && it.frequency == selectedInfo?.frequency && !it.output) {
-                -3 // Put input in the beginning
+                -3 // Put input at the beginning
             } else if (it.frequency != 0.toLong() && it.frequency == selectedInfo?.frequency) {
-                -1 // Put same frequency in the front
+                -1 // Put same frequency at the front
             } else {
                 // Frequencies from lowest to highest
                 it.frequency + Short.MAX_VALUE
@@ -85,7 +85,8 @@ class InfoList (initList: Collection<InfoWrapper>,
             when {
                 it.code == selectedEntry -> Long.MIN_VALUE + 1
                 it.frequency != 0L && it.frequency == selectedInfo?.frequency && !it.output -> Long.MIN_VALUE
-                it.frequency != 0.toLong() && it.frequency == selectedInfo?.frequency -> Long.MIN_VALUE + 2 // Put same frequency in the front
+                // Put the same frequency to the front
+                it.frequency != 0.toLong() && it.frequency == selectedInfo?.frequency -> Long.MIN_VALUE + 2
                 filter.activeFilters.containsKey(Filter.NAME) -> {
                     var hits = 0L
                     var name = it.name
@@ -126,7 +127,7 @@ class InfoList (initList: Collection<InfoWrapper>,
     }
 
     /**
-     * Update the master list, and send the changes downstream to sorted/filtered
+     * Updates the master list and sends the changes downstream to sorted/filtered.
      */
     fun update(updateList: Collection<InfoWrapper>) {
         updateList.forEach { masterMap[it.code] = it }

@@ -48,7 +48,7 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     if (input.frequency == 0L || input.isOutput) {
         frequency = System.currentTimeMillis()
     }
-    // If tunnel was already bound, unbind that one.
+    // If tunnel was already bound, unbind that one
     if (cache.getInput(frequency) != null) {
         val originalInput = cache.getInput(frequency)
         if (originalInput != input) {
@@ -86,12 +86,12 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
             outputResult.configManager.putSetting(it, settingsOut.getSetting(it))
         }
 
-        // For input, just copy the patterns over.
+        // For input, just copy the patterns over
         val patternsIn = input.interfaceDuality.patterns as AppEngInternalInventory
         patternsIn.forEachIndexed { index, stack ->
             (inputResult.interfaceDuality.patterns as AppEngInternalInventory).setInventorySlotContents(index, stack)
         }
-        // For output, drop items.
+        // For output, drop items
         val dropItems = mutableListOf<ItemStack>()
         val patternsOut = output.interfaceDuality.patterns as AppEngInternalInventory
         dropItems.addAll(patternsOut)
