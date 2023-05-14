@@ -37,12 +37,9 @@ public class ShadowRenderer {
         if (p == null) {
             return;
         }
-        renderBlockList(new ArrayList<List<Integer>>() {
-
-            {
-                add(p);
-            }
-        }, center, relX, relY, relZ, red, green, blue);
+        ArrayList<List<Integer>> blockPosList = new ArrayList<>();
+        blockPosList.add(p);
+        renderBlockList(blockPosList, center, relX, relY, relZ, red, green, blue);
     }
 
     public static void renderBlockPhantom(World world, final List<Integer> pos, ItemStack stack, final double relX,
