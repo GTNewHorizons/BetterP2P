@@ -59,7 +59,8 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     val outputResult: PartP2PTunnel<*> = updateP2P(output, frequency, true, player, input.customName)
     if (input is PartP2PInterface && output is PartP2PInterface) {
         // For input and output, retain upgrades, items, and settings.
-        inputResult as PartP2PInterface; outputResult as PartP2PInterface
+        inputResult as PartP2PInterface
+        outputResult as PartP2PInterface
         val upgradesIn = input.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
         upgradesIn.forEachIndexed { index, stack ->
             (inputResult.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
