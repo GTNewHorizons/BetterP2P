@@ -58,7 +58,7 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         for (widget in entries){
             widget.renderNameTextField = true
         }
-        if(renameBar.info != null && !renameBar.text.isEmpty() && renameBar.info.name != renameBar.text){
+        if(renameBar.info != null && renameBar.text.isNotEmpty() && renameBar.info.name != renameBar.text){
             val info:InfoWrapper = renameBar.info
             renameBar.text = renameBar.text.trim()
             ModNetwork.channel.sendToServer(C2SP2PTunnelInfo(P2PTunnelInfo(info.posX,info.posY,info.posZ,info.dim, ForgeDirection.valueOf(info.facing.name).ordinal,renameBar.text)))
