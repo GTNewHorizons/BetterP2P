@@ -103,7 +103,7 @@ public class ShadowRenderer {
     }
 
     private static void shadedCube(float scale) {
-        float size = 1.0F * scale;
+        float size = scale;
         Tessellator tessellator = Tessellator.instance;
         // BufferBuilder worldRenderer = tessellator.getBuffer();
         // Front - anticlockwise vertices
