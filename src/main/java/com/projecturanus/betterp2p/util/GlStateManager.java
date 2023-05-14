@@ -813,10 +813,6 @@ public class GlStateManager {
         }
 
         public Color(float redIn, float greenIn, float blueIn, float alphaIn) {
-            this.red = 1.0F;
-            this.green = 1.0F;
-            this.blue = 1.0F;
-            this.alpha = 1.0F;
             this.red = redIn;
             this.green = greenIn;
             this.blue = blueIn;
