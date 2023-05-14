@@ -877,7 +877,7 @@ public class GlStateManager {
 
         public final int mode;
 
-        private CullFace(int modeIn) {
+        CullFace(int modeIn) {
             this.mode = modeIn;
         }
     }
@@ -928,7 +928,7 @@ public class GlStateManager {
 
         public final int factor;
 
-        private DestFactor(int factorIn) {
+        DestFactor(int factorIn) {
             this.factor = factorIn;
         }
     }
@@ -943,7 +943,7 @@ public class GlStateManager {
         /** The capability ID of this {@link FogMode} */
         public final int capabilityId;
 
-        private FogMode(int capabilityIn) {
+        FogMode(int capabilityIn) {
             this.capabilityId = capabilityIn;
         }
     }
@@ -987,7 +987,7 @@ public class GlStateManager {
 
         public final int opcode;
 
-        private LogicOp(int opcodeIn) {
+        LogicOp(int opcodeIn) {
             this.opcode = opcodeIn;
         }
     }
@@ -1027,7 +1027,7 @@ public class GlStateManager {
 
         public final int factor;
 
-        private SourceFactor(int factorIn) {
+        SourceFactor(int factorIn) {
             this.factor = factorIn;
         }
     }
