@@ -869,7 +869,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum CullFace {
+    public enum CullFace {
 
         FRONT(1028),
         BACK(1029),
@@ -909,7 +909,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum DestFactor {
+    public enum DestFactor {
 
         CONSTANT_ALPHA(32771),
         CONSTANT_COLOR(32769),
@@ -934,7 +934,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum FogMode {
+    public enum FogMode {
 
         LINEAR(9729),
         EXP(2048),
@@ -966,7 +966,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum LogicOp {
+    public enum LogicOp {
 
         AND(5377),
         AND_INVERTED(5380),
@@ -1007,7 +1007,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum SourceFactor {
+    public enum SourceFactor {
 
         CONSTANT_ALPHA(32771),
         CONSTANT_COLOR(32769),
@@ -1063,7 +1063,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum TexGen {
+    public enum TexGen {
         S,
         T,
         R,
