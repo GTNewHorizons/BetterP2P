@@ -38,7 +38,7 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
     }
 
     open fun drawBG(tessellator: Tessellator, mouseX: Int, mouseY: Int, partialTicks: Float) {
-        gui.bindTexture(gui.BACKGROUND)
+        gui.bindTexture(gui.background)
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
         field_146123_n = mouseX >= xPosition && mouseY >= yPosition && mouseX < xPosition + width && mouseY < yPosition + height
         val k = getHoverState(field_146123_n)

@@ -86,7 +86,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         )
     }
 
-    val BACKGROUND: ResourceLocation = ResourceLocation(MODID, "textures/gui/advanced_memory_card.png")
+    val background: ResourceLocation = ResourceLocation(MODID, "textures/gui/advanced_memory_card.png")
     private val selectedInfo: InfoWrapper?
         get() = infos.selectedInfo
 
@@ -522,7 +522,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     private fun drawBackground() {
-        bindTexture(BACKGROUND)
+        bindTexture(background)
         val tessellator = Tessellator.instance
         // Draw the top part
         drawTexturedQuad(tessellator,
