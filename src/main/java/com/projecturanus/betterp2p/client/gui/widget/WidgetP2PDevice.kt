@@ -82,7 +82,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
                 GuiScreen.drawRect(x, y, x + P2PEntryConstants.WIDTH, y + P2PEntryConstants.HEIGHT, P2PEntryConstants.OUTPUT_COLOR)
             }
             GL11.glColor3f(255f, 255f, 255f)
-            // Draw our icons...
+            // Draw our icons
             drawBlockIcon(gui.mc, info.icon, info.overlay, x + 3, y + 3)
             gui.bindTexture(gui.BACKGROUND)
             if (info.output) {
