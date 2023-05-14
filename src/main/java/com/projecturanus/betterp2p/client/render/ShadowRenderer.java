@@ -15,19 +15,12 @@ import org.lwjgl.opengl.GL11;
 import com.projecturanus.betterp2p.util.GlStateManager;
 
 /**
- * Functions from this inner class are not authored by me (Sam Bassett aka Lothrazar) they are from BuildersGuides by
- *
- * @author Ipsis
- *
- *         All credit goes to author for this
- *
- *         Source code: https://github.com/Ipsis/BuildersGuides Source License
- *         https://github.com/Ipsis/BuildersGuides/blob/master/COPYING.LESSER
- *
- *         I used and modified two functions from this library
- *         https://github.com/Ipsis/BuildersGuides/blob/master/src/main/java/ipsis/buildersguides/util/RenderUtils.java
- *
- *
+ * This class uses the code from BuildersGuides.
+ * <a href="https://github.com/Ipsis/BuildersGuides">Source code</a>
+ * <a href="https://github.com/Ipsis/BuildersGuides/blob/master/COPYING.LESSER">Source license</a>
+ * In particular, two functions of
+ * <a href="https://github.com/Ipsis/BuildersGuides/blob/master/src/main/java/ipsis/buildersguides/util/RenderUtils.java">RenderUtils</a>
+ * were used.
  */
 @SuppressWarnings("serial")
 public class ShadowRenderer {
