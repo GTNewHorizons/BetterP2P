@@ -5,14 +5,16 @@ import appeng.api.networking.IGrid
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
-import appeng.helpers.DualityInterface
 import appeng.me.GridAccessException
 import appeng.me.GridNode
+import appeng.me.cache.P2PCache
 import appeng.parts.automation.UpgradeInventory
 import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PTunnel
 import appeng.tile.inventory.AppEngInternalInventory
 import appeng.util.Platform
+import com.projecturanus.betterp2p.BetterP2P
+import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.network.P2PInfo
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
@@ -21,8 +23,8 @@ import net.minecraftforge.common.util.ForgeDirection
 
 fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P2PStatus) : Pair<PartP2PTunnel<*>, PartP2PTunnel<*>>? {
     // If these calls mess up we have bigger problems...
-    val input = status.listP2P[inputIndex]!!
-    val output = status.listP2P[outputIndex]!!
+    val input = status.listP2P[inputIndex] ?: return null
+    var output = status.listP2P[outputIndex] ?: return null
 
     val grid: IGrid? = input.gridNode?.grid
     if (grid is ISecurityGrid) {
@@ -33,8 +35,8 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
 
     // TODO Change to exception
     if (input.javaClass != output.javaClass) {
-        // Cannot pair two different type of P2P
-        return null
+        //change output to input
+        output = changeP2P(output, BetterP2P.proxy.getP2PFromClass(input.javaClass)!!, player) ?: return null
     }
     if (input == output) {
         // Network loop
@@ -97,6 +99,88 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     return inputResult to outputResult
 }
 
+fun unlinkP2P(player: EntityPlayer, p2pIndex: Long, status: P2PStatus): PartP2PTunnel<*>? {
+    if (status.grid is ISecurityGrid) {
+        if (!status.grid.hasPermission(player, SecurityPermissions.BUILD) ||
+                !status.grid.hasPermission(player, SecurityPermissions.SECURITY)) {
+            return null
+        }
+    }
+    val tunnel = status.listP2P[p2pIndex] ?: return null
+    val oldFreq = tunnel.frequency
+    if (oldFreq == 0L) {
+        return tunnel
+    }
+
+    updateP2P(tunnel, 0L, false, player, tunnel.customName)
+    return tunnel
+}
+
+/**
+ * Converts one P2P into the type
+ */
+fun changeP2P(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityPlayer): PartP2PTunnel<*>? {
+    val grid = tunnel.gridNode.grid
+    if (grid is ISecurityGrid) {
+        if (!grid.hasPermission(player, SecurityPermissions.BUILD) ||
+                !grid.hasPermission(player, SecurityPermissions.SECURITY)) {
+            return null
+        }
+    }
+    if (BetterP2P.proxy.getP2PFromClass(tunnel.javaClass) == newType) {
+        return null
+    }
+    if (tunnel is PartP2PInterface) {
+        // For output, drop items.
+        val dropItems = mutableListOf<ItemStack>()
+        val patternsOut = tunnel.interfaceDuality.patterns as AppEngInternalInventory
+        dropItems.addAll(patternsOut)
+        Platform.spawnDrops(player.worldObj, tunnel.location.x, tunnel.location.y, tunnel.location.z, dropItems)
+    }
+    val host = tunnel.host
+    host.removePart(tunnel.side, false)
+    val dir = host.addPart(newType.stack, tunnel.side, player)
+    val newPart = host.getPart(dir)
+    if (newPart is PartP2PTunnel<*>) {
+        newPart.outputProperty = tunnel.isOutput
+        try {
+            val p2p: P2PCache = newPart.proxy.p2P
+            p2p.updateFreq(newPart, tunnel.frequency)
+            return newPart
+        } catch (e: GridAccessException) {
+            // :P
+        }
+    }
+    return null
+}
+
+/**
+ * Converts all connected P2Ps to a new type
+ */
+fun changeAllP2Ps(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityPlayer): Boolean {
+    val grid = tunnel.gridNode.grid
+    if (grid is ISecurityGrid) {
+        if (!grid.hasPermission(player, SecurityPermissions.BUILD) ||
+                !grid.hasPermission(player, SecurityPermissions.SECURITY)) {
+            return false
+        }
+    }
+    try {
+        if (tunnel.isOutput && tunnel.input != null) {
+            return changeAllP2Ps(tunnel.input, newType, player)
+        } else {
+            val outputs = tunnel.outputs.toMutableList()
+            changeP2P(tunnel, newType, player)
+            for (o in outputs) {
+                changeP2P(o, newType, player)
+            }
+            return true
+        }
+    } catch (e: GridAccessException) {
+        // :P
+    }
+    return false
+}
 /**
  * Due to Applied Energistics' limit
  */
@@ -146,4 +230,11 @@ val PartP2PTunnel<*>.hasChannel
 fun PartP2PTunnel<*>.toInfo()
     = P2PInfo(frequency, location.x, location.y, location.z, location.dimension, side,
               customName, isOutput, hasChannel, (externalFacingNode as? GridNode)?.usedChannels() ?: -1,
-              getItemStack(PartItemStack.Wrench))
+              getTypeIndex())
+
+/**
+ * Get the type index or use TUNNEL_ANY
+ */
+fun PartP2PTunnel<*>.getTypeIndex()
+    = BetterP2P.proxy.getP2PFromClass(this.javaClass)?.index ?: TUNNEL_ANY
+

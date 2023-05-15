@@ -5,17 +5,17 @@ import appeng.core.CreativeTab
 import appeng.parts.p2p.PartP2PTunnel
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.capability.MemoryInfo
+import com.projecturanus.betterp2p.capability.TUNNEL_ANY
 import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.gui.widget.GuiScale
 import com.projecturanus.betterp2p.network.ModNetwork
-import com.projecturanus.betterp2p.network.NONE
+import com.projecturanus.betterp2p.network.NONE_SELECTED
 import com.projecturanus.betterp2p.network.S2CListP2P
 import com.projecturanus.betterp2p.network.hashP2P
 import com.projecturanus.betterp2p.util.getPart
 import com.projecturanus.betterp2p.util.p2p.P2PCache
 import com.projecturanus.betterp2p.util.p2p.P2PStatus
-import com.projecturanus.betterp2p.util.p2p.areP2PEqual
-import com.projecturanus.betterp2p.util.p2p.toInfo
+import com.projecturanus.betterp2p.util.p2p.getTypeIndex
 import cpw.mods.fml.relauncher.Side
 import cpw.mods.fml.relauncher.SideOnly
 import net.minecraft.client.renderer.texture.IIconRegister
@@ -44,10 +44,7 @@ object ItemAdvancedMemoryCard : Item() {
 
     private fun sendStatus(status: P2PStatus, info: MemoryInfo, player: EntityPlayerMP) {
         P2PCache.statusMap[player.uniqueID] = status
-        ModNetwork.channel.sendTo(
-            S2CListP2P(status.listP2P.values.map { p2p -> p2p.toInfo() }, info),
-            player
-        )
+        ModNetwork.channel.sendTo(S2CListP2P(status.refresh(info.type), info), player)
     }
 
     @SideOnly(Side.CLIENT)
@@ -75,22 +72,27 @@ object ItemAdvancedMemoryCard : Item() {
                 val part = getPart(w, x, y, z, hx, hy, hz)
                 val stack = player.heldItem
                 val info = getInfo(stack)
+                val type: Int
+                val status: P2PStatus
                 if (part is PartP2PTunnel<*>) {
-                    val status = P2PStatus(player, part.gridNode.grid, part)
-                    val p2p = status.listP2P.values.firstOrNull { areP2PEqual(it, status.targetP2P) }
-                    if (p2p != null) {
-                        info.selectedEntry = hashP2P(p2p)
-                        writeInfo(stack, info)
-
-                        sendStatus(status, info, player as EntityPlayerMP)
-                        return true
+                    type = part.getTypeIndex()
+                    status = P2PStatus(part.gridNode.grid, player, type)
+                    info.selectedEntry = hashP2P(part)
+                } else {
+                    type = TUNNEL_ANY
+                    status = if (part != null) {
+                        // If we have a PartP2PTunnelME, it looks at the P2P grid node,
+                        // so we should use the part instead.
+                        P2PStatus(part.gridNode.grid, player, type)
+                    } else {
+                        // Fall back to the tile entity.
+                        P2PStatus(te.getGridNode(ForgeDirection.getOrientation(side)).grid, player, type)
                     }
+                    info.selectedEntry = NONE_SELECTED
                 }
-                // Fallback to sending the whole network
-                val node = te.getGridNode(ForgeDirection.getOrientation(side))!!
-                info.selectedEntry = NONE
+                info.type = type
                 writeInfo(stack, info)
-                sendStatus(P2PStatus(player, node.grid), info, player as EntityPlayerMP)
+                sendStatus(status, info, player as EntityPlayerMP)
                 return true
             }
         }
@@ -112,7 +114,7 @@ object ItemAdvancedMemoryCard : Item() {
         if (stack.tagCompound == null) stack.tagCompound = NBTTagCompound()
         val compound = stack.tagCompound!!
         if (!compound.hasKey("gui")) compound.setByte("gui", GuiScale.DYNAMIC.ordinal.toByte())
-        if (!compound.hasKey("selectedIndex", Constants.NBT.TAG_LONG)) compound.setLong("selectedIndex", NONE)
+        if (!compound.hasKey("selectedIndex", Constants.NBT.TAG_LONG)) compound.setLong("selectedIndex", NONE_SELECTED)
         return MemoryInfo(compound.getLong("selectedIndex"), compound.getLong("frequency"), BetterMemoryCardModes.values()[compound.getInteger("mode")], GuiScale.values()[compound.getByte("gui").toInt()])
     }
 

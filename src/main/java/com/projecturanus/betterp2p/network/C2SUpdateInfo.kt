@@ -11,14 +11,29 @@ fun writeMemoryInfo(buf: ByteBuf, info: MemoryInfo) {
     buf.writeLong(info.frequency)
     buf.writeInt(info.mode.ordinal)
     buf.writeByte(info.gui.ordinal)
+    buf.writeByte(info.type)
 }
 
 fun readMemoryInfo(buf: ByteBuf): MemoryInfo {
-    return MemoryInfo(buf.readLong(), buf.readLong(),
-                      BetterMemoryCardModes.values()[buf.readInt()],
-                      GuiScale.values()[buf.readByte().toInt()])
+    val selectedEntry = buf.readLong()
+    val frequency = buf.readLong()
+    val mode = try {
+        BetterMemoryCardModes.values()[buf.readInt()]
+    } catch (e: Exception) {
+        BetterMemoryCardModes.OUTPUT
+    }
+    val gui = try {
+        GuiScale.values()[buf.readByte().toInt()]
+    } catch (e: ArrayIndexOutOfBoundsException) {
+        GuiScale.DYNAMIC
+    }
+    val type = buf.readByte().toInt()
+    return MemoryInfo(selectedEntry, frequency, mode, gui, type)
 }
 
+/**
+ * Request from client -> server
+ */
 class C2SUpdateInfo(var info: MemoryInfo = MemoryInfo()) : IMessage {
     override fun fromBytes(buf: ByteBuf) {
         info = readMemoryInfo(buf)

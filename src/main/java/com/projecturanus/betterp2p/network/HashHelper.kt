@@ -47,4 +47,4 @@ private fun xorCollapse12(input: Int): Int {
 /**
  * Using `0x80000000` to represent none is selected (aka MSB set)
  */
-const val NONE: Long = Long.MIN_VALUE
+const val NONE_SELECTED: Long = Long.MIN_VALUE

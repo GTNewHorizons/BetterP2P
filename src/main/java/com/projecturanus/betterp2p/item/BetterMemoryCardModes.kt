@@ -1,22 +1,47 @@
 package com.projecturanus.betterp2p.item
 
-enum class BetterMemoryCardModes {
+const val MAX_TOOLTIP_LENGTH = 40
+
+enum class BetterMemoryCardModes(val unlocalizedName: String, vararg val unlocalizedDesc: String) {
     /**
      * Select an input P2P and bind its output
      */
-    OUTPUT,
+    OUTPUT("gui.advanced_memory_card.mode.output",
+        "gui.advanced_memory_card.mode.output.desc.1",
+            "gui.advanced_memory_card.mode.output.desc.2",
+            "gui.advanced_memory_card.mode.output.desc.3"
+    ),
 
     /**
      * Select an output P2P and bind its input
      */
-    INPUT,
+    INPUT("gui.advanced_memory_card.mode.input",
+        "gui.advanced_memory_card.mode.input.desc.1",
+        "gui.advanced_memory_card.mode.input.desc.2",
+        "gui.advanced_memory_card.mode.input.desc.3"
+    ),
 
     /**
      * Copy same output frequency
      */
-    COPY;
+    COPY("gui.advanced_memory_card.mode.copy",
+        "gui.advanced_memory_card.mode.copy.desc.1",
+        "gui.advanced_memory_card.mode.copy.desc.2",
+        "gui.advanced_memory_card.mode.copy.desc.3",
+        "gui.advanced_memory_card.mode.copy.desc.4",
+    ),
 
-    fun next(): BetterMemoryCardModes {
-        return values()[ordinal.plus(1) % values().size]
+    /**
+     * Unbind/reset frequencies
+     */
+    UNBIND("gui.advanced_memory_card.mode.unbind",
+        "gui.advanced_memory_card.mode.unbind.desc.1",
+        "gui.advanced_memory_card.mode.unbind.desc.2");
+
+    fun next(reverse: Boolean = false): BetterMemoryCardModes {
+        if (reverse) {
+            return values()[(ordinal - 1).mod(values().size)]
+        }
+        return values()[(ordinal + 1).mod(values().size)]
     }
 }

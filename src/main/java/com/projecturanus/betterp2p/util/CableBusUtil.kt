@@ -51,6 +51,15 @@ fun listTargetGridP2P(grid: IGrid?, player: EntityPlayer, clazz: Class<out PartP
     return grid?.getMachines(clazz)?.map { it.machine as PartP2PTunnel<*> }?.toList() ?: emptyList()
 }
 
+fun listAllGridP2P(grid: IGrid?, player: EntityPlayer): List<PartP2PTunnel<*>> {
+    if (grid is ISecurityGrid && !grid.hasPermission(player, SecurityPermissions.BUILD))
+        return emptyList()
+    val classes = grid?.machinesClasses?.filter { c -> c.superclass == PartP2PTunnel::class.java } ?: emptyList()
+    val ret: MutableList<PartP2PTunnel<*>> = mutableListOf()
+    classes.forEach{ c -> ret.addAll(grid?.getMachines(c)?.map { it.machine as PartP2PTunnel<*> } ?: emptyList()) }
+    return ret
+}
+
 val AEBasePart.facingPosX: Int?
     get() =
         host?.location?.x?.and(side?.offsetX ?: EnumFacing.UP.frontOffsetX)
