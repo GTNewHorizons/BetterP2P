@@ -18,6 +18,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 /**
  * Copied from forge 1.12.2-14.23.5.2847 net.minecraft.client.renderer.GlStateManager
  */
+// We keep the redundant casts to clarify what the function accepts as an input
+@SuppressWarnings("RedundantCast")
 @SideOnly(Side.CLIENT)
 public class GlStateManager {
 
