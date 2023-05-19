@@ -184,7 +184,9 @@ public class GlStateManager {
     public static void enableOutlineMode(int color) {
         BUF_FLOAT_4.put(0, (float) (color >> 16 & 255) / 255.0F);
         BUF_FLOAT_4.put(1, (float) (color >> 8 & 255) / 255.0F);
-        BUF_FLOAT_4.put(2, (float) (color & 255) / 255.0F);
+        // We keep ">> 0" to convey that we extract the LSB
+        //noinspection PointlessBitwiseExpression
+        BUF_FLOAT_4.put(2, (float) (color >> 0 & 255) / 255.0F);
         BUF_FLOAT_4.put(3, (float) (color >> 24 & 255) / 255.0F);
         glTexEnv(8960, 8705, BUF_FLOAT_4);
         glTexEnvi(8960, 8704, 34160);
