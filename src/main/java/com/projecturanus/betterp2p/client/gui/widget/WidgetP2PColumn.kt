@@ -58,7 +58,7 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         for (widget in entries){
             widget.renderNameTextField = true
         }
-        if(renameBar.info != null && !renameBar.text.isEmpty() && renameBar.info.name != renameBar.text){
+        if(renameBar.info != null && renameBar.text.isNotEmpty() && renameBar.info.name != renameBar.text){
             val info:InfoWrapper = renameBar.info
             renameBar.text = renameBar.text.trim()
             ModNetwork.channel.sendToServer(C2SP2PTunnelInfo(P2PTunnelInfo(info.posX,info.posY,info.posZ,info.dim, ForgeDirection.valueOf(info.facing.name).ordinal,renameBar.text)))
@@ -69,19 +69,11 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         renameBar.info = null
     }
 
-//private fun transportPlayer(info: InfoWrapper){
-//    Minecraft.getMinecraft().thePlayer.closeScreen()
-//    ModNetwork.channel.sendToServer(C2STransportPlayer(P2PTunnelInfo(info.posX,info.posY,info.posZ,info.dim,0)))
-//}
-
     /**
      * Called when rename button "area" is clicked. Rename text bar must be
      * visible after this is called.
      */
     private fun onRenameButtonClicked(info:InfoWrapper, index: Int) {
-//        if (GuiScreen.isShiftKeyDown()) {
-//            transportPlayer(info)
-//        }
         renameBar.isVisible = true
         renameBar.y = (this.y) + index * (P2PEntryConstants.HEIGHT + 1) + 1
         renameBar.x = this.x + 50

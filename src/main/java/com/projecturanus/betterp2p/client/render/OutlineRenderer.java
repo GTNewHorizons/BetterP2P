@@ -15,14 +15,10 @@ import com.projecturanus.betterp2p.util.GlStateManager;
 import kotlin.Pair;
 
 /**
- * Everything in this inner class is From a mod that has MIT license owned by romelo333 and maintained by McJty
- *
- * License is here: https://github.com/romelo333/notenoughwands1.8.8/blob/master/LICENSE
- *
- * Specific source of code from the GenericWand class:
- * https://github.com/romelo333/notenoughwands1.8.8/blob/20952f50e7c1ab3fd676ed3da302666295e3cac8/src/main/java/romelo333/notenoughwands/Items/GenericWand.java
- *
- * Version 1.1: Edited to support rotation
+ * This class is based on the <a href=
+ * "https://github.com/romelo333/notenoughwands1.8.8/blob/20952f50e7c1ab3fd676ed3da302666295e3cac8/src/main/java/romelo333/notenoughwands/Items/GenericWand.java">GenericWand</a>
+ * class from a mod with MIT license.
+ * <a href="https://github.com/romelo333/notenoughwands1.8.8/blob/master/LICENSE">Source license</a>
  */
 public class OutlineRenderer {
 
@@ -49,10 +45,7 @@ public class OutlineRenderer {
 
     private static void renderOutlines(Collection<List<Integer>> coordinates, int r, int g, int b, int thickness) {
         Tessellator tessellator = Tessellator.instance;
-        // net.minecraft.client.renderer.VertexBuffer
-        // BufferBuilder buffer = tessellator.getBuffer();
         tessellator.startDrawing(GL11.GL_LINES);
-        // GlStateManager.color(r / 255.0f, g / 255.0f, b / 255.0f);
         GL11.glLineWidth(thickness);
         for (List<Integer> coordinate : coordinates) {
             float x = coordinate.get(0);
@@ -115,7 +108,6 @@ public class OutlineRenderer {
     private static void renderOutlinesWithFacing(Collection<Pair<List<Integer>, ForgeDirection>> coordinates, double x,
             double y, double z, int r, int g, int b, int thickness) {
         Tessellator tessellator = Tessellator.instance;
-        // BufferBuilder buffer = tessellator.getBuffer();
 
         for (Pair<List<Integer>, ForgeDirection> coordinate : coordinates) {
             List<Integer> pos = coordinate.component1();

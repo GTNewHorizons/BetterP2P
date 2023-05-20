@@ -15,19 +15,11 @@ import org.lwjgl.opengl.GL11;
 import com.projecturanus.betterp2p.util.GlStateManager;
 
 /**
- * Functions from this inner class are not authored by me (Sam Bassett aka Lothrazar) they are from BuildersGuides by
- *
- * @author Ipsis
- *
- *         All credit goes to author for this
- *
- *         Source code: https://github.com/Ipsis/BuildersGuides Source License
- *         https://github.com/Ipsis/BuildersGuides/blob/master/COPYING.LESSER
- *
- *         I used and modified two functions from this library
- *         https://github.com/Ipsis/BuildersGuides/blob/master/src/main/java/ipsis/buildersguides/util/RenderUtils.java
- *
- *
+ * This class uses the code from BuildersGuides. <a href="https://github.com/Ipsis/BuildersGuides">Source code</a>
+ * <a href="https://github.com/Ipsis/BuildersGuides/blob/master/COPYING.LESSER">Source license</a> In particular, two
+ * functions of <a href=
+ * "https://github.com/Ipsis/BuildersGuides/blob/master/src/main/java/ipsis/buildersguides/util/RenderUtils.java">RenderUtils</a>
+ * were used.
  */
 @SuppressWarnings("serial")
 public class ShadowRenderer {
@@ -37,12 +29,9 @@ public class ShadowRenderer {
         if (p == null) {
             return;
         }
-        renderBlockList(new ArrayList<List<Integer>>() {
-
-            {
-                add(p);
-            }
-        }, center, relX, relY, relZ, red, green, blue);
+        ArrayList<List<Integer>> blockPosList = new ArrayList<>();
+        blockPosList.add(p);
+        renderBlockList(blockPosList, center, relX, relY, relZ, red, green, blue);
     }
 
     public static void renderBlockPhantom(World world, final List<Integer> pos, ItemStack stack, final double relX,
@@ -58,9 +47,7 @@ public class ShadowRenderer {
         int xOffset = target.get(0) - pos.get(0);
         int yOffset = target.get(1) - pos.get(1);
         int zOffset = target.get(2) - pos.get(2);
-        // final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
         Tessellator tessellator = Tessellator.instance;
-        // BufferBuilder bufferBuilder = tessellator.getBuffer();
         GlStateManager.pushMatrix();
         // this first translate is to make relative to TE and everything
         GlStateManager.translate(relX + 0.5F, relY + 0.5F, relZ + 0.5F);
@@ -113,9 +100,8 @@ public class ShadowRenderer {
     }
 
     private static void shadedCube(float scale) {
-        float size = 1.0F * scale;
+        float size = scale;
         Tessellator tessellator = Tessellator.instance;
-        // BufferBuilder worldRenderer = tessellator.getBuffer();
         // Front - anticlockwise vertices
         // Back - clockwise vertices
         tessellator.startDrawing(GL11.GL_QUADS);

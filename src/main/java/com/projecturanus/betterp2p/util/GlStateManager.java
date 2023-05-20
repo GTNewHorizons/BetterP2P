@@ -18,6 +18,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 /**
  * Copied from forge 1.12.2-14.23.5.2847 net.minecraft.client.renderer.GlStateManager
  */
+// We keep the redundant casts to clarify what the function accepts as an input
+@SuppressWarnings("RedundantCast")
 @SideOnly(Side.CLIENT)
 public class GlStateManager {
 
@@ -184,6 +186,8 @@ public class GlStateManager {
     public static void enableOutlineMode(int color) {
         BUF_FLOAT_4.put(0, (float) (color >> 16 & 255) / 255.0F);
         BUF_FLOAT_4.put(1, (float) (color >> 8 & 255) / 255.0F);
+        // We keep ">> 0" to convey that we extract the LSB
+        // noinspection PointlessBitwiseExpression
         BUF_FLOAT_4.put(2, (float) (color >> 0 & 255) / 255.0F);
         BUF_FLOAT_4.put(3, (float) (color >> 24 & 255) / 255.0F);
         glTexEnv(8960, 8705, BUF_FLOAT_4);
@@ -335,8 +339,6 @@ public class GlStateManager {
 
     private static GlStateManager.TexGenCoord texGenCoord(GlStateManager.TexGen texGen) {
         switch (texGen) {
-            case S:
-                return texGenState.s;
             case T:
                 return texGenState.t;
             case R:
@@ -815,10 +817,6 @@ public class GlStateManager {
         }
 
         public Color(float redIn, float greenIn, float blueIn, float alphaIn) {
-            this.red = 1.0F;
-            this.green = 1.0F;
-            this.blue = 1.0F;
-            this.alpha = 1.0F;
             this.red = redIn;
             this.green = greenIn;
             this.blue = blueIn;
@@ -869,7 +867,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum CullFace {
+    public enum CullFace {
 
         FRONT(1028),
         BACK(1029),
@@ -877,7 +875,7 @@ public class GlStateManager {
 
         public final int mode;
 
-        private CullFace(int modeIn) {
+        CullFace(int modeIn) {
             this.mode = modeIn;
         }
     }
@@ -909,7 +907,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum DestFactor {
+    public enum DestFactor {
 
         CONSTANT_ALPHA(32771),
         CONSTANT_COLOR(32769),
@@ -928,13 +926,13 @@ public class GlStateManager {
 
         public final int factor;
 
-        private DestFactor(int factorIn) {
+        DestFactor(int factorIn) {
             this.factor = factorIn;
         }
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum FogMode {
+    public enum FogMode {
 
         LINEAR(9729),
         EXP(2048),
@@ -943,7 +941,7 @@ public class GlStateManager {
         /** The capability ID of this {@link FogMode} */
         public final int capabilityId;
 
-        private FogMode(int capabilityIn) {
+        FogMode(int capabilityIn) {
             this.capabilityId = capabilityIn;
         }
     }
@@ -966,7 +964,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum LogicOp {
+    public enum LogicOp {
 
         AND(5377),
         AND_INVERTED(5380),
@@ -987,7 +985,7 @@ public class GlStateManager {
 
         public final int opcode;
 
-        private LogicOp(int opcodeIn) {
+        LogicOp(int opcodeIn) {
             this.opcode = opcodeIn;
         }
     }
@@ -1007,7 +1005,7 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum SourceFactor {
+    public enum SourceFactor {
 
         CONSTANT_ALPHA(32771),
         CONSTANT_COLOR(32769),
@@ -1027,7 +1025,7 @@ public class GlStateManager {
 
         public final int factor;
 
-        private SourceFactor(int factorIn) {
+        SourceFactor(int factorIn) {
             this.factor = factorIn;
         }
     }
@@ -1063,11 +1061,11 @@ public class GlStateManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static enum TexGen {
+    public enum TexGen {
         S,
         T,
         R,
-        Q;
+        Q
     }
 
     @SideOnly(Side.CLIENT)

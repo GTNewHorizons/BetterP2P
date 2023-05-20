@@ -82,9 +82,9 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
                 GuiScreen.drawRect(x, y, x + P2PEntryConstants.WIDTH, y + P2PEntryConstants.HEIGHT, P2PEntryConstants.OUTPUT_COLOR)
             }
             GL11.glColor3f(255f, 255f, 255f)
-            // Draw our icons...
+            // Draw our icons
             drawBlockIcon(gui.mc, info.icon, info.overlay, x + 3, y + 3)
-            gui.bindTexture(gui.BACKGROUND)
+            gui.bindTexture(gui.background)
             if (info.output) {
                 drawTexturedQuad(Tessellator.instance, x.toDouble(), y + 4.0, x + 16.0, y + 20.0,
                     144.0 / GUI_WIDTH, 200.0 / GUI_TEX_HEIGHT, 160.0 / GUI_WIDTH, 216.0 / GUI_TEX_HEIGHT)

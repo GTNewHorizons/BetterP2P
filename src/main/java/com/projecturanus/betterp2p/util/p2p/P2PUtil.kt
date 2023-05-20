@@ -48,7 +48,7 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     if (input.frequency == 0L || input.isOutput) {
         frequency = System.currentTimeMillis()
     }
-    // If tunnel was already bound, unbind that one.
+    // If tunnel was already bound, unbind that one
     if (cache.getInput(frequency) != null) {
         val originalInput = cache.getInput(frequency)
         if (originalInput != input) {
@@ -59,7 +59,8 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     val outputResult: PartP2PTunnel<*> = updateP2P(output, frequency, true, player, input.customName)
     if (input is PartP2PInterface && output is PartP2PInterface) {
         // For input and output, retain upgrades, items, and settings.
-        inputResult as PartP2PInterface; outputResult as PartP2PInterface
+        inputResult as PartP2PInterface
+        outputResult as PartP2PInterface
         val upgradesIn = input.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
         upgradesIn.forEachIndexed { index, stack ->
             (inputResult.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
@@ -85,12 +86,12 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
             outputResult.configManager.putSetting(it, settingsOut.getSetting(it))
         }
 
-        // For input, just copy the patterns over.
+        // For input, just copy the patterns over
         val patternsIn = input.interfaceDuality.patterns as AppEngInternalInventory
         patternsIn.forEachIndexed { index, stack ->
             (inputResult.interfaceDuality.patterns as AppEngInternalInventory).setInventorySlotContents(index, stack)
         }
-        // For output, drop items.
+        // For output, drop items
         val dropItems = mutableListOf<ItemStack>()
         val patternsOut = output.interfaceDuality.patterns as AppEngInternalInventory
         dropItems.addAll(patternsOut)

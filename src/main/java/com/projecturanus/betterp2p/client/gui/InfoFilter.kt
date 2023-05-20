@@ -69,8 +69,8 @@ class InfoFilter {
 }
 
 /**
- * The different filter types. Probably will let these be adjustable in the
- * config.
+ * Holds different filter types.
+ * TODO they will probably be adjustable in the config.
  */
 enum class Filter(val pattern: Regex, val filter: (InfoWrapper, List<String>?) -> Boolean) {
     INPUT("\\A@in\\z".toRegex(), { it, _ -> !it.output }),
@@ -89,7 +89,7 @@ enum class Filter(val pattern: Regex, val filter: (InfoWrapper, List<String>?) -
     NAME("\"?.+\"?".toRegex(), filter@{ it, strs ->
         val name = it.name.lowercase()
         for (f in strs!!) {
-            // Ppl better not troll and use double quotes in their P2P tunnel names
+            // Double quotes will likely break P2P tunneling
             val query = f.removeSurrounding("\"")
             if (name.contains(query)) {
                 return@filter true
@@ -99,7 +99,7 @@ enum class Filter(val pattern: Regex, val filter: (InfoWrapper, List<String>?) -
     });
 }
 
-// I spent 10 minutes on this until I gave up... regex wtf
+// Splitting a string with regex is hard.
 // https://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
 val SEARCH_REGEX = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'".toRegex()
 
