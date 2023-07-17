@@ -5,12 +5,15 @@ import appeng.api.networking.IGrid
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
+import appeng.helpers.IInterfaceHost
 import appeng.me.GridAccessException
 import appeng.me.GridNode
 import appeng.me.cache.P2PCache
 import appeng.parts.automation.UpgradeInventory
 import appeng.parts.p2p.PartP2PInterface
 import appeng.parts.p2p.PartP2PTunnel
+import appeng.parts.p2p.PartP2PTunnelNormal
+import appeng.parts.p2p.PartP2PTunnelStatic
 import appeng.tile.inventory.AppEngInternalInventory
 import appeng.util.Platform
 import com.projecturanus.betterp2p.BetterP2P
@@ -19,6 +22,8 @@ import com.projecturanus.betterp2p.network.P2PInfo
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.ChatComponentText
+import net.minecraft.util.ChatComponentTranslation
 import net.minecraftforge.common.util.ForgeDirection
 
 fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P2PStatus) : Pair<PartP2PTunnel<*>, PartP2PTunnel<*>>? {
@@ -57,10 +62,10 @@ fun linkP2P(player: EntityPlayer, inputIndex: Long, outputIndex: Long, status: P
     }
     val inputResult: PartP2PTunnel<*> = updateP2P(input, frequency, false, player, input.customName)
     val outputResult: PartP2PTunnel<*> = updateP2P(output, frequency, true, player, input.customName)
-    if (input is PartP2PInterface && output is PartP2PInterface) {
+    if (input is IInterfaceHost && output is IInterfaceHost) {
         // For input and output, retain upgrades, items, and settings.
-        inputResult as PartP2PInterface
-        outputResult as PartP2PInterface
+        inputResult as IInterfaceHost
+        outputResult as IInterfaceHost
         val upgradesIn = input.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
         upgradesIn.forEachIndexed { index, stack ->
             (inputResult.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
@@ -129,15 +134,33 @@ fun changeP2P(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityPlaye
         }
     }
     if (BetterP2P.proxy.getP2PFromClass(tunnel.javaClass) == newType) {
+        player.addChatMessage(ChatComponentText("P2P already this type."))
         return null
     }
-    if (tunnel is PartP2PInterface) {
-        // For output, drop items.
-        val dropItems = mutableListOf<ItemStack>()
-        val patternsOut = tunnel.interfaceDuality.patterns as AppEngInternalInventory
-        dropItems.addAll(patternsOut)
-        Platform.spawnDrops(player.worldObj, tunnel.location.x, tunnel.location.y, tunnel.location.z, dropItems)
+    if (newType.clazz.superclass == PartP2PTunnelStatic::class.java) {
+        var canConvert = false
+        for ((i, stack) in player.inventory.mainInventory.withIndex()) {
+            if (stack?.isItemEqual(newType.stack) == true) {
+                player.inventory.decrStackSize(i, 1)
+                canConvert = true
+                break
+            }
+        }
+        if (!canConvert) {
+            player.addChatMessage(ChatComponentTranslation("gui.advanced_memory_card.error.missing_items", 1, newType.stack.displayName))
+            return null
+        }
     }
+    if (tunnel is PartP2PTunnelStatic<*>) {
+        val drop = ItemStack.copyItemStack(tunnel.itemStack)
+        drop.stackSize = 1
+        if (!player.inventory.addItemStackToInventory(drop)) {
+            val drops = mutableListOf<ItemStack>(drop)
+            tunnel.getDrops(drops, false)
+            Platform.spawnDrops(player.worldObj, player.serverPosX, player.serverPosY, player.serverPosZ, drops)
+        }
+    }
+
     val host = tunnel.host
     host.removePart(tunnel.side, false)
     val dir = host.addPart(newType.stack, tunnel.side, player)
@@ -171,6 +194,21 @@ fun changeAllP2Ps(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityP
             return changeAllP2Ps(tunnel.input, newType, player)
         } else {
             val outputs = tunnel.outputs.toMutableList()
+            if (newType.clazz.superclass == PartP2PTunnelStatic::class.java) {
+                val amt = outputs.size + 1
+                var hasItems = false
+                for ((i, stack) in player.inventory.mainInventory.withIndex()) {
+                    if (stack?.isItemEqual(newType.stack) == true && stack.stackSize >= amt) {
+                        player.inventory.decrStackSize(i, 1)
+                        hasItems = true
+                        break
+                    }
+                }
+                if (!hasItems) {
+                    player.addChatMessage(ChatComponentTranslation("gui.advanced_memory_card.error.missing_items", amt, newType.stack.displayName))
+                    return false
+                }
+            }
             changeP2P(tunnel, newType, player)
             for (o in outputs) {
                 changeP2P(o, newType, player)
