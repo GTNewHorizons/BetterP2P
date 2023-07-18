@@ -15,11 +15,14 @@ import appeng.parts.p2p.PartP2PRFPower
 import appeng.parts.p2p.PartP2PRedstone
 import appeng.parts.p2p.PartP2PTunnel
 import appeng.parts.p2p.PartP2PTunnelME
+import com.glodblock.github.common.parts.PartFluidP2PInterface
+import com.glodblock.github.loader.ItemAndBlockHolder
 import com.projecturanus.betterp2p.client.render.RenderHandler
 import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard
 import com.projecturanus.betterp2p.network.ServerPlayerDisconnectHandler
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
 import com.projecturanus.betterp2p.util.p2p.TunnelInfo
+import cpw.mods.fml.common.Loader
 import cpw.mods.fml.common.registry.GameRegistry
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.ShapelessRecipes
@@ -97,6 +100,16 @@ open class CommonProxy {
             def = partDefs.p2PTunnelMEInterface(),
             type = typeId++,
             classType = PartP2PInterface::class.java)
+        if (Loader.isModLoaded("ae2fc")) {
+            val item = ItemAndBlockHolder.FLUID_INTERFACE_P2P
+            if (item != null) {
+                val clazz = PartFluidP2PInterface::class.java
+                val type = typeId++
+                val info = TunnelInfo(type, item.stack(), clazz)
+                tunnelTypes[clazz] = info
+                tunnelIndices[type] = info
+            }
+        }
     }
 
     private fun registerTunnel(def: IItemDefinition, type: Int, classType: Class<out PartP2PTunnel<*>>) {
@@ -136,72 +149,84 @@ class ClientProxy: CommonProxy() {
      */
     override fun initTunnels() {
         val partDefs = AEApi.instance().definitions().parts()
+        var typeId = 0
         registerTunnel(
             def = partDefs.p2PTunnelME(),
-            type = TunnelType.ME,
+            type = typeId++,
             classType = PartP2PTunnelME::class.java,
             icon = { PartP2PTunnelME(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelEU(),
-            type = TunnelType.IC2_POWER,
+            type = typeId++,
             classType = PartP2PIC2Power::class.java,
             icon = { PartP2PIC2Power(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelRF(),
-            type = TunnelType.RF_POWER,
+            type = typeId++,
             classType = PartP2PRFPower::class.java,
             icon = { PartP2PRFPower(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelRedstone(),
-            type = TunnelType.REDSTONE,
+            type = typeId++,
             classType = PartP2PRedstone::class.java,
             icon = { PartP2PRedstone(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelLiquids(),
-            type = TunnelType.FLUID,
+            type = typeId++,
             classType = PartP2PLiquids::class.java,
             icon = { PartP2PLiquids(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelItems(),
-            type = TunnelType.ITEM,
+            type = typeId++,
             classType = PartP2PItems::class.java,
             icon = { PartP2PItems(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelLight(),
-            type = TunnelType.LIGHT,
+            type = typeId++,
             classType = PartP2PLight::class.java,
             icon = { PartP2PLight(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelOpenComputers(),
-            type = TunnelType.COMPUTER_MESSAGE,
+            type = typeId++,
             classType = PartP2POpenComputers::class.java,
             icon = { PartP2POpenComputers(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelPneumaticCraft(),
-            type = TunnelType.PRESSURE,
+            type = typeId++,
             classType = PartP2PPressure::class.java,
             icon = { PartP2PPressure(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelGregtech(),
-            type = TunnelType.GT_POWER,
+            type = typeId++,
             classType = PartP2PGT5Power::class.java,
             icon = { PartP2PGT5Power(it).typeTexture })
         registerTunnel(
             def = partDefs.p2PTunnelMEInterface(),
-            type = TunnelType.ME_INTERFACE,
+            type = typeId++,
             classType = PartP2PInterface::class.java,
             icon = { PartP2PInterface(it).typeTexture })
+        if (Loader.isModLoaded("ae2fc")) {
+            val item = ItemAndBlockHolder.FLUID_INTERFACE_P2P
+            if (item != null) {
+                val clazz = PartFluidP2PInterface::class.java
+                val stack = item.stack()
+                val type = typeId++
+                val info = ClientTunnelInfo(type, stack, clazz) { PartFluidP2PInterface(stack).typeTexture }
+                tunnelTypes[clazz] = info
+                tunnelIndices[type] = info
+            }
+        }
     }
 
     private inline fun registerTunnel(def: IItemDefinition,
-                                      type: TunnelType,
+                                      type: Int,
                                       classType: Class<out PartP2PTunnel<*>>,
                                       crossinline icon: (ItemStack) -> IIcon) {
         if (def.isEnabled) {
             val stack = def.maybeStack(1).get()
-            val info = ClientTunnelInfo(type.ordinal, stack, classType) { icon(stack) }
+            val info = ClientTunnelInfo(type, stack, classType) { icon(stack) }
             tunnelTypes[classType] = info
-            tunnelIndices[type.ordinal] = info
+            tunnelIndices[type] = info
         }
     }
 }
