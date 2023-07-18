@@ -197,9 +197,8 @@ fun changeAllP2Ps(tunnel: PartP2PTunnel<*>, newType: TunnelInfo, player: EntityP
             if (newType.clazz.superclass == PartP2PTunnelStatic::class.java) {
                 val amt = outputs.size + 1
                 var hasItems = false
-                for ((i, stack) in player.inventory.mainInventory.withIndex()) {
+                for (stack in player.inventory.mainInventory) {
                     if (stack?.isItemEqual(newType.stack) == true && stack.stackSize >= amt) {
-                        player.inventory.decrStackSize(i, 1)
                         hasItems = true
                         break
                     }
