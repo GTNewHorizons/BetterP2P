@@ -1,5 +1,7 @@
 package com.projecturanus.betterp2p.network.packet
 
+import net.minecraft.client.Minecraft
+
 import com.projecturanus.betterp2p.client.gui.GuiAdvancedMemoryCard
 import com.projecturanus.betterp2p.network.data.P2PInfo
 import com.projecturanus.betterp2p.network.data.readP2PInfo
@@ -11,7 +13,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext
 import cpw.mods.fml.relauncher.Side
 import cpw.mods.fml.relauncher.SideOnly
 import io.netty.buffer.ByteBuf
-import net.minecraft.client.Minecraft
 
 /**
  * Server -> Client packet for sending P2P updates. More lightweight than OpenGui.

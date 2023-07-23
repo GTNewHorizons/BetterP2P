@@ -1,9 +1,14 @@
 package com.projecturanus.betterp2p.network
 
-import appeng.api.networking.IGrid
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
+import java.util.Collections
+import java.util.UUID
+import java.util.WeakHashMap
+
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.EntityPlayerMP
 
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.network.data.GridServerCache
@@ -27,13 +32,11 @@ import com.projecturanus.betterp2p.network.packet.ServerTypeChangeHandler
 import com.projecturanus.betterp2p.network.packet.ServerUnlinkP2PHandler
 import com.projecturanus.betterp2p.network.packet.ServerUpdateInfoHandler
 
-import net.minecraft.entity.player.EntityPlayer
 
+import appeng.api.networking.IGrid
 import cpw.mods.fml.common.network.NetworkRegistry
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import cpw.mods.fml.relauncher.Side
-import net.minecraft.entity.player.EntityPlayerMP
-import java.util.*
 
 /**
  * Network cooldown time in milliseconds

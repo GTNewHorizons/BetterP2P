@@ -1,11 +1,12 @@
 package com.projecturanus.betterp2p.client.gui
 
-import appeng.client.gui.widgets.MEGuiTextField
-import appeng.parts.p2p.PartP2PGT5Power
-import appeng.parts.p2p.PartP2PInterface
-import appeng.parts.p2p.PartP2PLiquids
-import appeng.parts.p2p.PartP2PRedstone
-import appeng.parts.p2p.PartP2PTunnelME
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.FontRenderer
+import net.minecraft.client.gui.GuiScreen
+import net.minecraft.client.renderer.Tessellator
+import net.minecraft.client.resources.I18n
+import net.minecraft.util.ResourceLocation
+
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.network.data.MemoryInfo
@@ -23,12 +24,13 @@ import com.projecturanus.betterp2p.network.packet.C2SRefreshP2PList
 import com.projecturanus.betterp2p.network.packet.C2SUpdateMemoryInfo
 import com.projecturanus.betterp2p.network.packet.S2COpenGui
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.FontRenderer
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.renderer.Tessellator
-import net.minecraft.client.resources.I18n
-import net.minecraft.util.ResourceLocation
+
+import appeng.client.gui.widgets.MEGuiTextField
+import appeng.parts.p2p.PartP2PGT5Power
+import appeng.parts.p2p.PartP2PInterface
+import appeng.parts.p2p.PartP2PLiquids
+import appeng.parts.p2p.PartP2PRedstone
+import appeng.parts.p2p.PartP2PTunnelME
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.GL11

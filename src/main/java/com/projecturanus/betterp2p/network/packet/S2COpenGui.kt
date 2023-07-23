@@ -1,5 +1,7 @@
 package com.projecturanus.betterp2p.network.packet
 
+import net.minecraft.client.Minecraft
+
 import com.projecturanus.betterp2p.client.gui.GuiAdvancedMemoryCard
 import com.projecturanus.betterp2p.network.data.*
 import cpw.mods.fml.common.network.simpleimpl.IMessage
@@ -8,7 +10,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext
 import cpw.mods.fml.relauncher.Side
 import cpw.mods.fml.relauncher.SideOnly
 import io.netty.buffer.ByteBuf
-import net.minecraft.client.Minecraft
 
 /**
  * A Server->Client packet that sends a list of P2Ps over the net.

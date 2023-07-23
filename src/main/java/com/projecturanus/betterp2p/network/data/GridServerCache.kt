@@ -1,7 +1,6 @@
 package com.projecturanus.betterp2p.network.data
 
-import java.lang.ref.WeakReference
-import java.util.UUID
+import java.lang.IllegalStateException
 
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
@@ -12,11 +11,10 @@ import net.minecraftforge.common.util.ForgeDirection
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import com.projecturanus.betterp2p.util.p2p.outputProperty
+import com.projecturanus.betterp2p.util.p2p.getTypeIndex
 
 import appeng.api.config.SecurityPermissions
 import appeng.api.networking.IGrid
-import appeng.api.networking.events.MENetworkEventSubscribe
-import appeng.api.networking.events.MENetworkPowerStatusChange
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
@@ -28,10 +26,6 @@ import appeng.parts.p2p.PartP2PTunnel
 import appeng.parts.p2p.PartP2PTunnelStatic
 import appeng.tile.inventory.AppEngInternalInventory
 import appeng.util.Platform
-import com.projecturanus.betterp2p.util.p2p.getTypeIndex
-import net.minecraft.entity.player.EntityPlayerMP
-import java.lang.IllegalStateException
-import java.util.WeakHashMap
 
 /**
  * When the player uses the adv memory card, this is cached on the server side

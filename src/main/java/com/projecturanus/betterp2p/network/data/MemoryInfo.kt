@@ -1,9 +1,9 @@
 package com.projecturanus.betterp2p.network.data
 
-import io.netty.buffer.ByteBuf
-
 import com.projecturanus.betterp2p.client.gui.widget.GuiScale
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
+
+import io.netty.buffer.ByteBuf
 
 /**
  * Using `-1` to represent any tunnel type.

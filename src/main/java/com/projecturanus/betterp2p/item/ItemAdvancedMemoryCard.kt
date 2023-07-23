@@ -1,7 +1,6 @@
 package com.projecturanus.betterp2p.item
 
 import appeng.api.config.SecurityPermissions
-import appeng.api.networking.IGrid
 import appeng.api.networking.IGridHost
 import appeng.api.networking.security.ISecurityGrid
 import appeng.core.CreativeTab
@@ -10,17 +9,18 @@ import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.gui.widget.GuiScale
 import com.projecturanus.betterp2p.network.ModNetwork
-import com.projecturanus.betterp2p.network.data.*
-import com.projecturanus.betterp2p.network.packet.S2COpenGui
+import com.projecturanus.betterp2p.network.data.MemoryInfo
+import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
+import com.projecturanus.betterp2p.network.data.readP2PLocation
+import com.projecturanus.betterp2p.network.data.toLoc
+import com.projecturanus.betterp2p.network.data.writeP2PLocation
 import com.projecturanus.betterp2p.util.getPart
-import com.projecturanus.betterp2p.network.data.GridServerCache
 import com.projecturanus.betterp2p.util.p2p.getTypeIndex
 import cpw.mods.fml.relauncher.Side
 import cpw.mods.fml.relauncher.SideOnly
 import net.minecraft.client.renderer.texture.IIconRegister
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound

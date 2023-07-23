@@ -2,7 +2,6 @@ package com.projecturanus.betterp2p.network.data
 
 import appeng.parts.p2p.PartP2PTunnel
 
-
 /**
  * Generates a 64-bit hash code from X, Y, Z, Facing, and Dimension info.
  * bits 0-47: FashHash of (x, y, z) ->

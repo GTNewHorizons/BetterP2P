@@ -5,6 +5,7 @@ import com.projecturanus.betterp2p.network.data.P2PLocation
 import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
 import com.projecturanus.betterp2p.network.data.readP2PLocation
 import com.projecturanus.betterp2p.network.data.writeP2PLocation
+
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
 import cpw.mods.fml.common.network.simpleimpl.MessageContext

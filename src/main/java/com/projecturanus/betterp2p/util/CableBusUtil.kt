@@ -1,21 +1,16 @@
 package com.projecturanus.betterp2p.util
 
-import appeng.api.config.SecurityPermissions
-import appeng.api.networking.IGrid
-import appeng.api.networking.security.ISecurityGrid
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.Vec3
+import net.minecraft.world.IBlockAccess
+
 import appeng.api.parts.IPart
 import appeng.api.parts.IPartHost
 import appeng.api.parts.SelectedPart
 import appeng.parts.AEBasePart
 import appeng.parts.ICableBusContainer
-import appeng.parts.p2p.PartP2PTunnel
-import appeng.parts.p2p.PartP2PTunnelNormal
 import appeng.tile.networking.TileCableBus
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.Vec3
-import net.minecraft.world.IBlockAccess
 
 /**
  * @see appeng.block.networking.BlockCableBus.cb
