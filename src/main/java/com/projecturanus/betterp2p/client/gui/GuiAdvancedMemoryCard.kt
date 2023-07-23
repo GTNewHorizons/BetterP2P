@@ -8,16 +8,21 @@ import appeng.parts.p2p.PartP2PRedstone
 import appeng.parts.p2p.PartP2PTunnelME
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.MODID
-import com.projecturanus.betterp2p.capability.MemoryInfo
-import com.projecturanus.betterp2p.capability.TUNNEL_ANY
+import com.projecturanus.betterp2p.network.data.MemoryInfo
+import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
 import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.TextureBound
 import com.projecturanus.betterp2p.client.gui.widget.*
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
 import com.projecturanus.betterp2p.item.MAX_TOOLTIP_LENGTH
 import com.projecturanus.betterp2p.network.*
+import com.projecturanus.betterp2p.network.data.P2PInfo
+import com.projecturanus.betterp2p.network.data.P2PLocation
+import com.projecturanus.betterp2p.network.packet.C2SCloseGui
+import com.projecturanus.betterp2p.network.packet.C2SRefreshP2PList
+import com.projecturanus.betterp2p.network.packet.C2SUpdateMemoryInfo
+import com.projecturanus.betterp2p.network.packet.S2COpenGui
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
-import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiScreen
@@ -30,7 +35,7 @@ import org.lwjgl.opengl.GL11
 
 const val GUI_WIDTH = 288
 const val GUI_TEX_HEIGHT = 264
-class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
+class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
 
     private var guiLeft: Int = 0
 
@@ -51,7 +56,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             _ySize = lazy { value }
         }
 
-    private var scale = msg.memoryInfo.gui
+    private var scale = msg.memoryInfo.guiScale
     private val resizeButton: WidgetButton
 
     private var mode = msg.memoryInfo.mode
@@ -386,14 +391,20 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     fun refreshInfo(infos: List<P2PInfo>) {
-        this.infos.rebuild(infos.map(::InfoWrapper))
+        this.infos.rebuild(infos.map(::InfoWrapper), scrollBar, scale.size(height - 75))
+        checkInfo()
+        refreshOverlay()
+    }
+
+    fun updateInfo(infos: List<P2PInfo>) {
+        this.infos.update(infos.map(::InfoWrapper), scrollBar, scale.size(height - 75))
         checkInfo()
         refreshOverlay()
     }
 
     private fun syncMemoryInfo() {
         ModNetwork.channel.sendToServer(
-            C2SUpdateInfo(MemoryInfo(infos.selectedEntry, selectedInfo?.frequency ?: 0, mode, scale, type?.index ?: TUNNEL_ANY)))
+            C2SUpdateMemoryInfo(MemoryInfo(infos.selectedEntry, selectedInfo?.frequency ?: 0, mode, scale, type?.index ?: TUNNEL_ANY)))
     }
 
     override fun onGuiClosed() {
@@ -450,8 +461,8 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
      * Selects the info with the hashCode, if it exists. Otherwise,
      * deselect the entry.
      */
-    fun selectInfo(hash: Long) {
-        infos.select(hash)
+    fun selectInfo(which: P2PLocation?) {
+        infos.select(which)
         syncMemoryInfo()
         refreshOverlay()
     }
@@ -462,15 +473,15 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             ClientCache.selectedFacing = null
         }
         else {
-            ClientCache.selectedPosition = arrayListOf(selectedInfo?.posX, selectedInfo?.posY, selectedInfo?.posZ)
-            ClientCache.selectedFacing = selectedInfo?.facing
+            ClientCache.selectedPosition = arrayListOf(selectedInfo?.loc?.x, selectedInfo?.loc?.y, selectedInfo?.loc?.z)
+            ClientCache.selectedFacing = selectedInfo?.loc?.facing
         }
         ClientCache.positions.clear()
         ClientCache.positions.addAll(infos.sorted.filter {
             it.frequency == selectedInfo?.frequency &&
             it != selectedInfo &&
-            it.dim == mc.thePlayer.dimension
-        }.map { arrayListOf(it.posX, it.posY, it.posZ) to it.facing })
+            it.loc.dim == mc.thePlayer.dimension
+        }.map { arrayListOf(it.loc.x, it.loc.y, it.loc.z) to it.loc.facing })
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {

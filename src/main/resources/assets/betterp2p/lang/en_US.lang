@@ -45,3 +45,4 @@ gui.advanced_memory_card.p2p_status.offline=Offline
 gui.advanced_memory_card.types.filtered=Showing: %s
 gui.advanced_memory_card.types.any=§aAll
 gui.advanced_memory_card.error.missing_items=Cannot change P2P type without %dx %s(s).
+gui.advanced_memory_card.error.same_type=P2P already this type.

@@ -37,33 +37,6 @@ fun getPart(w: IBlockAccess, posX: Int, posY: Int, posZ: Int, hitX: Float, hitY:
     return p?.part
 }
 
-/**
- * Return a list of p2p in the part's target grid
- * @param grid Grid
- * @param player Player to check permission
- * @param clazz P2P class type
- * @return a list of p2p tunnel in the target grid, or an empty list
- */
-fun listTargetGridP2P(grid: IGrid?, player: EntityPlayer, clazz: Class<out PartP2PTunnel<*>>): List<PartP2PTunnel<*>> {
-    if (grid is ISecurityGrid)
-        if (!grid.hasPermission(player, SecurityPermissions.BUILD))
-            return emptyList()
-
-    return grid?.getMachines(clazz)?.map { it.machine as PartP2PTunnel<*> }?.toList() ?: emptyList()
-}
-
-fun listAllGridP2P(grid: IGrid?, player: EntityPlayer): List<PartP2PTunnel<*>> {
-    if (grid is ISecurityGrid && !grid.hasPermission(player, SecurityPermissions.BUILD))
-        return emptyList()
-    val classes = grid?.machinesClasses?.filter {
-        // Find all P2P tunnels...
-        c -> c.superclass.superclass == PartP2PTunnel::class.java
-    } ?: emptyList()
-    val ret: MutableList<PartP2PTunnel<*>> = mutableListOf()
-    classes.forEach{ c -> ret.addAll(grid?.getMachines(c)?.map { it.machine as PartP2PTunnel<*> } ?: emptyList()) }
-    return ret
-}
-
 val AEBasePart.facingPosX: Int?
     get() =
         host?.location?.x?.and(side?.offsetX ?: EnumFacing.UP.frontOffsetX)
