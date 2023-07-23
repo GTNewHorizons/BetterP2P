@@ -1,7 +1,6 @@
-package com.projecturanus.betterp2p.network
+package com.projecturanus.betterp2p.network.data
 
 import appeng.parts.p2p.PartP2PTunnel
-
 
 /**
  * Generates a 64-bit hash code from X, Y, Z, Facing, and Dimension info.
@@ -11,11 +10,11 @@ import appeng.parts.p2p.PartP2PTunnel
  * bit 63: Reserved
  */
 fun hashP2P(x: Int, y: Int, z: Int, facing: Int, dim: Int): Long {
-    var ret = facing.toULong() shl 61
+    val ret = facing.toULong() shl 60
     val lo: ULong = x.toULong() or (y.toULong() shl 32)
     val hi: ULong = z.toULong() or (dim.toULong() shl 32)
     var hash = hashLen16(lo, hi)
-    hash = hash xor (hash shr 60)
+    hash = hash xor (hash shr 59)
     return (ret or hash).toLong()
 }
 
@@ -54,8 +53,3 @@ private fun hashLen16(lo: ULong, hi: ULong): ULong {
 
     return f
 }
-
-/**
- * Using `0x80000000` to represent none is selected (aka MSB set)
- */
-const val NONE_SELECTED: Long = Long.MIN_VALUE
