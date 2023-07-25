@@ -267,7 +267,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
                 this.index = type?.index ?: TUNNEL_ANY
                 gui.type = type
                 commitType()
-                gui.closeTypeSelector()
+                gui.closeTypeSelector(type)
             }
 
             override fun x(): Int {
@@ -360,7 +360,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         buttonList.add(refreshButton)
 
         if (typeSelector.parent != typeButton) {
-            closeTypeSelector()
+            closeTypeSelector(type)
         } else {
             typeSelector.setPos(typeSelector.parent.x(), typeSelector.parent.y())
         }
@@ -377,7 +377,8 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         typeSelector.visible = true
     }
 
-    fun closeTypeSelector() {
+    fun closeTypeSelector(type: ClientTunnelInfo?) {
+        this.type = type
         typeSelector.visible = false
     }
 
@@ -572,7 +573,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
 
     override fun keyTyped(char: Char, key: Int) {
         if (key == Keyboard.KEY_ESCAPE && typeSelector.visible) {
-            closeTypeSelector()
+            closeTypeSelector(type)
             return
         }
         if (key == Keyboard.KEY_LSHIFT || col.keyTyped(char, key)) return

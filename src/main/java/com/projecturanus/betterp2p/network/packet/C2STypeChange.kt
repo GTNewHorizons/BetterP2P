@@ -35,7 +35,7 @@ class ServerTypeChangeHandler : IMessageHandler<C2STypeChange, IMessage?> {
         val type = BetterP2P.proxy.getP2PFromIndex(message.newType) ?: return null
 
         if (state.gridCache.changeAllP2Ps(message.p2p!!, type)) {
-            ModNetwork.requestP2PUpdate(ctx.serverHandler.playerEntity)
+            ModNetwork.requestP2PList(ctx.serverHandler.playerEntity, type.index)
         }
 
         return null
