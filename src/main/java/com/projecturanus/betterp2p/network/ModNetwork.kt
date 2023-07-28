@@ -87,7 +87,6 @@ object ModNetwork {
             if (playerState.updateReady + NETWORK_CD < System.currentTimeMillis()) {
                 channel.sendTo(S2CUpdateP2P(cache.retrieveP2PList(), true), player as EntityPlayerMP)
                 playerState.updateReady = System.currentTimeMillis() + NETWORK_CD
-                println("Sending now")
             } else if (!playerState.updatePending) {
                 playerState.updatePending = true
                 networkWorker.schedule({
