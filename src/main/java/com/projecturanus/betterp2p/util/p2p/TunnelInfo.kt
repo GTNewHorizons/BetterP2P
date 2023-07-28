@@ -1,8 +1,9 @@
 package com.projecturanus.betterp2p.util.p2p
 
-import appeng.parts.p2p.PartP2PTunnel
 import net.minecraft.item.ItemStack
 import net.minecraft.util.IIcon
+
+import appeng.parts.p2p.PartP2PTunnel
 
 /**
  * Common tunnel info to be used on server
