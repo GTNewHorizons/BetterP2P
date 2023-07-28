@@ -1,19 +1,18 @@
 package com.projecturanus.betterp2p.client.gui
 
 import com.projecturanus.betterp2p.BetterP2P
-import com.projecturanus.betterp2p.network.P2PInfo
-import com.projecturanus.betterp2p.network.hashP2P
+import com.projecturanus.betterp2p.network.data.P2PInfo
+import com.projecturanus.betterp2p.network.data.P2PLocation
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
+import cpw.mods.fml.relauncher.Side
+import cpw.mods.fml.relauncher.SideOnly
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.resources.I18n
 import net.minecraft.util.IIcon
 import net.minecraftforge.common.util.ForgeDirection
 
+@SideOnly(Side.CLIENT)
 class InfoWrapper(info: P2PInfo) {
-    // Basic information
-    val code: Long by lazy {
-        hashP2P(posX, posY, posZ, facing.ordinal, dim)
-    }
     var frequency: Long = info.frequency
         set(value) {
             if (error || value == 0L) {
@@ -25,11 +24,7 @@ class InfoWrapper(info: P2PInfo) {
         }
 
     val hasChannel = info.hasChannel
-    val posX: Int = info.posX
-    val posY: Int = info.posY
-    val posZ: Int = info.posZ
-    val dim: Int = info.world
-    val facing: ForgeDirection = info.facing
+    val loc: P2PLocation = P2PLocation(info.posX, info.posY, info.posZ, info.facing, info.dim)
     val output: Boolean = info.output
     val type: Int = info.type
 
@@ -96,7 +91,7 @@ class InfoWrapper(info: P2PInfo) {
             "§bP2P - ${p2pType.dispName}",
             "§e" + I18n.format("gui.advanced_memory_card.pos", info.posX, info.posY, info.posZ),
             "§e" + I18n.format("gui.advanced_memory_card.side", info.facing.name),
-            "§e" + I18n.format("gui.advanced_memory_card.dim", info.world)
+            "§e" + I18n.format("gui.advanced_memory_card.dim", info.dim)
         )
         if (error || frequency == 0L) {
             hoverInfo.add("§c" + I18n.format("gui.advanced_memory_card.p2p_status.unbound"))
@@ -107,19 +102,15 @@ class InfoWrapper(info: P2PInfo) {
     }
 
     override fun hashCode(): Int {
-        return code.hashCode()
+        return loc.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
-        return if (other is InfoWrapper) {
-            this.posX == other.posX &&
-            this.posY == other.posY &&
-            this.posZ == other.posZ &&
-            this.dim == other.dim &&
-            this.facing == other.facing
-        } else {
-            false
-        }
+        if (this === other) return true
+        if (this.javaClass != other?.javaClass) return false
+        other as InfoWrapper
+
+        return this.loc == other.loc
     }
 }
 
