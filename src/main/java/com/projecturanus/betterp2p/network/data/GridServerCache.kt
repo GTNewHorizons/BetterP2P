@@ -90,9 +90,9 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
      * Sets the entry to the p2p tunnel and marks it as dirty to be sent in the next network update.
      * Only p2ps of the currently targeted type can be shown
      */
-    fun markDirty(key: P2PLocation, p2p: PartP2PTunnel<*>, force: Boolean = false) {
+    fun markDirty(key: P2PLocation, p2p: PartP2PTunnel<*>) {
         synchronized(listP2P) {
-            if (force || type == TUNNEL_ANY || p2p.getTypeIndex() == type) {
+            if (type == TUNNEL_ANY || p2p.getTypeIndex() == type) {
                 listP2P[key] = p2p
                 dirtyP2P.add(key)
             }
@@ -256,7 +256,6 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
         if (newPart is PartP2PTunnel<*>) {
             newPart.outputProperty = tunnel.isOutput
             try {
-                markDirty(tunnel.toLoc(), newPart, true)
                 val p2p: P2PCache = newPart.proxy.p2P
                 p2p.updateFreq(newPart, tunnel.frequency)
                 return newPart

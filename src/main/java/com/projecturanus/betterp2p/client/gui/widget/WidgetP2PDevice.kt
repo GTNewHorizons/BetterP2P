@@ -138,7 +138,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
 
     override fun accept(type: ClientTunnelInfo?) {
         ModNetwork.channel.sendToServer(C2STypeChange(type?.index ?: TUNNEL_ANY, infoSupplier()!!.loc))
-        gui.closeTypeSelector()
+        gui.closeTypeSelector(type)
     }
 
     override fun x(): Int {
