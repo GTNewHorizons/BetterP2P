@@ -12,7 +12,10 @@ import kotlin.reflect.KProperty0
  * a sorted view and a filtered view of the internal map.
  */
 class InfoList (initList: Collection<InfoWrapper>,
-                private val search: KProperty0<String>) {
+                var hideIn: KProperty0<Boolean>,
+                var hideOut: KProperty0<Boolean>,
+                var hideBound: KProperty0<Boolean>,
+                var hideUnbound: KProperty0<Boolean>) {
 
     /**
      * The master map, acts as the source of truth for all items
@@ -33,11 +36,6 @@ class InfoList (initList: Collection<InfoWrapper>,
 
     private val filter: InfoFilter = InfoFilter()
 
-    /**
-     * Binding to the search string in the text box
-     */
-    private val searchStr: String
-        get() = search.get()
 
     val selectedInfo: InfoWrapper?
         get() {
@@ -76,11 +74,24 @@ class InfoList (initList: Collection<InfoWrapper>,
     /**
      * Updates the filtered list.
      */
-    fun refilter() {
-        filter.updateFilter(searchStr.lowercase())
+    fun refilter(search: String) {
+        filter.updateFilter(search.lowercase())
         filtered = sorted.filter {
+            // It ain't pretty, but it's faster than before.
             if (it.loc == selectedEntry) {
                 return@filter true
+            }
+            if (hideIn.get() && !it.output) {
+                return@filter false
+            }
+            if (hideOut.get() && it.output) {
+                return@filter false
+            }
+            if (hideBound.get() && it.frequency != 0L && !it.error) {
+                return@filter false
+            }
+            if (hideUnbound.get() && (it.error || it.frequency == 0L)) {
+                return@filter false
             }
             for ((f, strs) in filter.activeFilters) {
                 if(!f.filter(it, strs?.toList())) {
@@ -113,41 +124,47 @@ class InfoList (initList: Collection<InfoWrapper>,
     /**
      * Updates the sorted list and applies the filter again.
      */
-    fun refresh() {
+    fun refresh(search: String) {
         sorted.clear()
         sorted.addAll(masterMap.values)
         resort()
-        refilter()
+        refilter(search)
     }
 
     /**
      * Completely refresh the master list.
      */
-    fun rebuild(updateList: Collection<InfoWrapper>, scrollbar: WidgetScrollBar, numEntries: Int) {
+    fun rebuild(updateList: Collection<InfoWrapper>, search: String, scrollbar: WidgetScrollBar, numEntries: Int) {
         masterMap.clear()
         updateList.forEach { masterMap[it.loc] = it }
         sorted.clear()
         sorted.addAll(masterMap.values)
         resort()
-        // TODO: Extend the filtering mechanism.
-        refilter()
+        refilter(search)
         scrollbar.setRange(0, masterMap.size.coerceIn(0, (masterMap.size - numEntries).coerceAtLeast(0)), 23)
     }
 
     /**
      * Updates the master list and sends the changes downstream to sorted/filtered.
      */
-    fun update(updateList: Collection<InfoWrapper>, scrollbar: WidgetScrollBar, numEntries: Int) {
+    fun update(updateList: Collection<InfoWrapper>, search: String, scrollbar: WidgetScrollBar, numEntries: Int) {
         updateList.forEach { masterMap[it.loc] = it }
         sorted.clear()
         sorted.addAll(masterMap.values)
         resort()
-        // TODO: Extend the filtering mechanism.
-        refilter()
+        refilter(search)
         scrollbar.setRange(0, masterMap.size.coerceIn(0, (masterMap.size - numEntries).coerceAtLeast(0)), 23)
     }
 
     fun select(which: P2PLocation?) {
         selectedEntry = masterMap.getOrDefault(which, null)?.loc
+    }
+
+    fun findInput(frequency: Long): InfoWrapper? {
+        return masterMap.values.find { it.frequency == frequency && !it.output }
+    }
+
+    fun findAnyOutput(frequency: Long): InfoWrapper? {
+        return masterMap.values.find { it.frequency == frequency && it.output }
     }
 }

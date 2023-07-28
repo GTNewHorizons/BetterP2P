@@ -35,8 +35,12 @@ import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.GL11
 
-const val GUI_WIDTH = 288
+const val GUI_TEX_WIDTH = 288
 const val GUI_TEX_HEIGHT = 264
+const val GUI_HIDE_INPUT_MASK = 0b1000
+const val GUI_HIDE_OUTPUT_MASK = 0b0100
+const val GUI_HIDE_BOUND_MASK = 0b0010
+const val GUI_HIDE_UNBOUND_MASK = 0b0001
 class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
 
     private var guiLeft: Int = 0
@@ -69,10 +73,27 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
 
     private val refreshButton: WidgetButton
 
+    private val inCheckbox: WidgetCheckbox =
+        WidgetCheckbox(this, 8, 149, I18n.format("gui.advanced_memory_card.sortinfo2"),
+                msg.memoryInfo.hideFlags and GUI_HIDE_INPUT_MASK != 0)
+    private val outCheckbox: WidgetCheckbox =
+        WidgetCheckbox(this, 8, 149, I18n.format("gui.advanced_memory_card.sortinfo3"),
+                msg.memoryInfo.hideFlags and GUI_HIDE_OUTPUT_MASK != 0)
+    private val boundCheckbox: WidgetCheckbox =
+        WidgetCheckbox(this, 8, 149, I18n.format("gui.advanced_memory_card.sortinfo4"),
+                msg.memoryInfo.hideFlags and GUI_HIDE_BOUND_MASK != 0)
+    private val unboundCheckbox: WidgetCheckbox =
+        WidgetCheckbox(this, 8, 149, I18n.format("gui.advanced_memory_card.sortinfo5"),
+                msg.memoryInfo.hideFlags and GUI_HIDE_UNBOUND_MASK != 0)
+
     private val scrollBar: WidgetScrollBar
     private val searchBar: MEGuiTextField
 
-    private val infos = InfoList(msg.infos.map(::InfoWrapper), ::searchText)
+    private val infos = InfoList(msg.infos.map(::InfoWrapper),
+            inCheckbox::isChecked,
+            outCheckbox::isChecked,
+            boundCheckbox::isChecked,
+            unboundCheckbox::isChecked)
 
     private val typeSelector: WidgetTypeSelector
 
@@ -329,7 +350,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         val numEntries = scale.size(height - 75)
         ySize = (numEntries * P2PEntryConstants.HEIGHT) + 75 + (numEntries - 1)
         guiTop = (h - ySize) / 2
-        guiLeft = (width - GUI_WIDTH) / 2
+        guiLeft = (width - GUI_TEX_WIDTH) / 2
 
         scrollBar.displayX = guiLeft + 268
         scrollBar.displayY = guiTop + 19
@@ -359,12 +380,25 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         refreshButton.setTexCoords(32 * 5.0, 200.0)
         buttonList.add(refreshButton)
 
+        inCheckbox.init()
+        inCheckbox.setPosition(guiLeft + 8, guiTop + 149 + (numEntries - 3) * P2PEntryConstants.HEIGHT)
+        buttonList.add(inCheckbox)
+        outCheckbox.init()
+        outCheckbox.setPosition(guiLeft + 8 + 100, guiTop + 149 + (numEntries - 3) * P2PEntryConstants.HEIGHT)
+        buttonList.add(outCheckbox)
+        boundCheckbox.init()
+        boundCheckbox.setPosition(guiLeft + 8, guiTop + 149 + 16 + (numEntries - 3) * P2PEntryConstants.HEIGHT)
+        buttonList.add(boundCheckbox)
+        unboundCheckbox.init()
+        unboundCheckbox.setPosition(guiLeft + 8 + 100, guiTop + 149 + 16 + (numEntries - 3) * P2PEntryConstants.HEIGHT)
+        buttonList.add(unboundCheckbox)
+
         if (typeSelector.parent != typeButton) {
             closeTypeSelector(type)
         } else {
             typeSelector.setPos(typeSelector.parent.x(), typeSelector.parent.y())
         }
-        infos.refresh()
+        infos.refresh(searchText)
         checkInfo()
         refreshOverlay()
         col.entries.forEach { it.updateButtonVisibility() }
@@ -388,26 +422,40 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
             it.error = it.frequency != 0L && if (it.output) {
                 col.findInput(it.frequency) == null
             } else {
-                col.findOutput(it.frequency) == null
+                col.findAnyOutput(it.frequency) == null
             }
         }
     }
 
     fun refreshInfo(infos: List<P2PInfo>) {
-        this.infos.rebuild(infos.map(::InfoWrapper), scrollBar, scale.size(height - 75))
+        this.infos.rebuild(infos.map(::InfoWrapper), searchText, scrollBar, scale.size(height - 75))
         checkInfo()
         refreshOverlay()
     }
 
     fun updateInfo(infos: List<P2PInfo>) {
-        this.infos.update(infos.map(::InfoWrapper), scrollBar, scale.size(height - 75))
+        this.infos.update(infos.map(::InfoWrapper), searchText,scrollBar, scale.size(height - 75))
         checkInfo()
         refreshOverlay()
     }
 
+    fun updateInfo() {
+        this.infos.refilter(searchText)
+    }
+
     private fun syncMemoryInfo() {
+        var hideFlags: Int = if (inCheckbox.isChecked) GUI_HIDE_INPUT_MASK else 0
+        hideFlags = hideFlags or if (outCheckbox.isChecked) GUI_HIDE_OUTPUT_MASK else 0
+        hideFlags = hideFlags or if (boundCheckbox.isChecked) GUI_HIDE_BOUND_MASK else 0
+        hideFlags = hideFlags or if (unboundCheckbox.isChecked) GUI_HIDE_UNBOUND_MASK else 0
         ModNetwork.channel.sendToServer(
-            C2SUpdateMemoryInfo(MemoryInfo(infos.selectedEntry, selectedInfo?.frequency ?: 0, mode, scale, type?.index ?: TUNNEL_ANY)))
+            C2SUpdateMemoryInfo(MemoryInfo(
+                infos.selectedEntry,
+                selectedInfo?.frequency ?: 0,
+                mode,
+                scale,
+                type?.index ?: TUNNEL_ANY,
+                hideFlags)))
     }
 
     override fun onGuiClosed() {
@@ -503,7 +551,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         if (mouseButton == 1 && searchBar.isMouseIn(mouseX, mouseY)) {
             this.searchBar.text = ""
-            infos.refilter()
+            infos.refilter(searchText)
         }
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
@@ -542,7 +590,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         drawTexturedQuad(tessellator,
             x0 = guiLeft.toDouble(),
             y0 = guiTop.toDouble(),
-            x1 = (guiLeft + GUI_WIDTH).toDouble(),
+            x1 = (guiLeft + GUI_TEX_WIDTH).toDouble(),
             y1 = guiTop + 60.0,
             u0 = 0.0, v0 = 0.0,
             u1 = 1.0, v1 = 60.0 / GUI_TEX_HEIGHT)
@@ -552,7 +600,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
             drawTexturedQuad(tessellator,
                 x0 = guiLeft.toDouble(),
                 y0 = guiTop + 60.0 + p2pHeight * i,
-                x1 = (guiLeft + GUI_WIDTH).toDouble(),
+                x1 = (guiLeft + GUI_TEX_WIDTH).toDouble(),
                 y1 = guiTop + 60.0 + p2pHeight * (i + 1),
                 u0 = 0.0, v0 = 60.0 / GUI_TEX_HEIGHT,
                 u1 = 1.0, v1 = 102.0 / GUI_TEX_HEIGHT)
@@ -561,7 +609,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         drawTexturedQuad(tessellator,
             x0 = guiLeft.toDouble(),
             y0 = guiTop + ySize - 98.0,
-            x1 = (guiLeft + GUI_WIDTH).toDouble(),
+            x1 = (guiLeft + GUI_TEX_WIDTH).toDouble(),
             y1 = (guiTop + ySize).toDouble(),
             u0 = 0.0, v0 = 102.0 / GUI_TEX_HEIGHT,
             u1 = 1.0, v1 = 200.0 / GUI_TEX_HEIGHT)
@@ -578,7 +626,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         }
         if (key == Keyboard.KEY_LSHIFT || col.keyTyped(char, key)) return
         if (!(char.isWhitespace() && searchBar.text.isEmpty()) && searchBar.textboxKeyTyped(char, key)){
-            infos.refilter()
+            infos.refilter(searchText)
         } else if (char == 'e') {
             mc.displayGuiScreen(null as GuiScreen?)
             mc.setIngameFocus()

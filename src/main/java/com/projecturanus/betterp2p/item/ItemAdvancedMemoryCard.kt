@@ -117,7 +117,8 @@ object ItemAdvancedMemoryCard : Item() {
                 selectedEntry = readP2PLocation(compound.getCompoundTag("selectedIndex")),
                 frequency = compound.getLong("frequency"),
                 mode = BetterMemoryCardModes.values()[compound.getInteger("mode")],
-                guiScale = GuiScale.values()[compound.getByte("gui").toInt()])
+                guiScale = GuiScale.values()[compound.getByte("gui").toInt()],
+                hideFlags = compound.getByte("hide").toInt())
     }
 
     fun writeInfo(stack: ItemStack, info: MemoryInfo) {
@@ -129,5 +130,6 @@ object ItemAdvancedMemoryCard : Item() {
         compound.setLong("frequency", info.frequency)
         compound.setInteger("mode", info.mode.ordinal)
         compound.setByte("gui", info.guiScale.ordinal.toByte())
+        compound.setByte("hide", info.hideFlags.toByte())
     }
 }

@@ -1,7 +1,7 @@
 package com.projecturanus.betterp2p.client.gui.widget
 
 import com.projecturanus.betterp2p.client.gui.GUI_TEX_HEIGHT
-import com.projecturanus.betterp2p.client.gui.GUI_WIDTH
+import com.projecturanus.betterp2p.client.gui.GUI_TEX_WIDTH
 import com.projecturanus.betterp2p.client.gui.GuiAdvancedMemoryCard
 import com.projecturanus.betterp2p.client.gui.drawTexturedQuad
 import net.minecraft.client.Minecraft
@@ -33,8 +33,8 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
         // Draw button icon
         drawTexturedQuad(tessellator, xPosition + 1.0, yPosition + 1.0,
             xPosition + width - 1.0, yPosition + height - 1.0,
-            u0 = texX / GUI_WIDTH, v0 = texY / GUI_TEX_HEIGHT,
-            u1 = (texX + width) / GUI_WIDTH, v1 = (texY + height) / GUI_TEX_HEIGHT)
+            u0 = texX / GUI_TEX_WIDTH, v0 = texY / GUI_TEX_HEIGHT,
+            u1 = (texX + width) / GUI_TEX_WIDTH, v1 = (texY + height) / GUI_TEX_HEIGHT)
     }
 
     open fun drawBG(tessellator: Tessellator, mouseX: Int, mouseY: Int, partialTicks: Float) {
@@ -50,8 +50,8 @@ abstract class WidgetButton(val gui: GuiAdvancedMemoryCard, x: Int, y: Int, widt
                 y0 = yPosition.toDouble(),
                 x1 = (xPosition + width).toDouble(),
                 y1 = (yPosition + height).toDouble(),
-                u0 = (32.0 * k) / GUI_WIDTH, v0 = (232.0) / GUI_TEX_HEIGHT,
-                u1 = (32.0 * (k + 1)) / GUI_WIDTH, v1 = (232.0 + height) / GUI_TEX_HEIGHT)
+                u0 = (32.0 * k) / GUI_TEX_WIDTH, v0 = (232.0) / GUI_TEX_HEIGHT,
+                u1 = (32.0 * (k + 1)) / GUI_TEX_WIDTH, v1 = (232.0 + height) / GUI_TEX_HEIGHT)
     }
 
     fun setPosition(x: Int, y: Int) {

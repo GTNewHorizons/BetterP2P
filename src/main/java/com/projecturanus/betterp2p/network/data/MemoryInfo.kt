@@ -23,7 +23,8 @@ data class MemoryInfo(
         var frequency: Long = 0,
         var mode: BetterMemoryCardModes = BetterMemoryCardModes.OUTPUT,
         var guiScale: GuiScale = GuiScale.DYNAMIC,
-        var type: Int = TUNNEL_ANY)
+        var type: Int = TUNNEL_ANY,
+        var hideFlags: Int = 0)
 fun readMemoryInfo(buf: ByteBuf): MemoryInfo {
     var selectedEntry: P2PLocation? = null
     if (buf.readBoolean()) {
@@ -41,7 +42,8 @@ fun readMemoryInfo(buf: ByteBuf): MemoryInfo {
         GuiScale.DYNAMIC
     }
     val type = buf.readByte().toInt()
-    return MemoryInfo(selectedEntry, frequency, mode, guiScale, type)
+    val hideFlags = buf.readByte().toInt()
+    return MemoryInfo(selectedEntry, frequency, mode, guiScale, type, hideFlags)
 }
 
 fun writeMemoryInfo(buf: ByteBuf, info: MemoryInfo) {
@@ -55,4 +57,5 @@ fun writeMemoryInfo(buf: ByteBuf, info: MemoryInfo) {
     buf.writeInt(info.mode.ordinal)
     buf.writeByte(info.guiScale.ordinal)
     buf.writeByte(info.type)
+    buf.writeByte(info.hideFlags)
 }

@@ -26,24 +26,11 @@ class InfoFilter {
     fun updateFilter(query: String) {
         val tokens = SEARCH_REGEX.findAll(query)
         activeFilters.clear()
-        var bind: String
         tokens.forEach {
             val token = it.value
             // If we don't start with a tag, skip all these regexes
             if (token.startsWith("@")) {
                 when {
-                    it.value.matches(Filter.INPUT.pattern) -> {
-                        activeFilters.putIfAbsent(Filter.INPUT, null)
-                    }
-                    it.value.matches(Filter.OUTPUT.pattern) -> {
-                        activeFilters.putIfAbsent(Filter.OUTPUT, null)
-                    }
-                    it.value.matches(Filter.BOUND.pattern) -> {
-                        activeFilters.putIfAbsent(Filter.BOUND, null)
-                    }
-                    it.value.matches(Filter.UNBOUND.pattern) -> {
-                        activeFilters.putIfAbsent(Filter.UNBOUND, null)
-                    }
                     it.value.matches(Filter.TYPE.pattern) -> {
                         val result = Filter.TYPE.pattern.find(it.value)!!
                         val l = mutableListOf<String>()
@@ -69,14 +56,9 @@ class InfoFilter {
 }
 
 /**
- * Holds different filter types.
- * TODO they will probably be adjustable in the config.
+ * Holds different filter types for use in the search bar
  */
 enum class Filter(val pattern: Regex, val filter: (InfoWrapper, List<String>?) -> Boolean) {
-    INPUT("\\A@in\\z".toRegex(), { it, _ -> !it.output }),
-    OUTPUT("\\A@out\\z".toRegex(), { it, _ -> it.output }),
-    BOUND("\\A@b\\z".toRegex(), { it, _ -> it.frequency != 0L }),
-    UNBOUND("\\A@u\\z".toRegex(), { it, _ -> it.frequency == 0L || it.error }),
     TYPE("\\A@types*=(.+)\\z".toRegex(), filter@{ it, strs ->
         val tags = BetterP2P.proxy.getP2PFromIndex(it.type)!!.dispName.lowercase()
         for (f in strs!!) {

@@ -105,7 +105,7 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
                 ModNetwork.channel.sendToServer(C2SLinkP2P(infos.selectedEntry, info.loc))
             }
             BetterMemoryCardModes.COPY -> {
-                val input = findInput(infos.selectedInfo?.frequency)
+                val input = infos.selectedInfo?.frequency?.let { findInput(it) }
                 if (input != null)
                     ModNetwork.channel.sendToServer(C2SLinkP2P(input.loc, info.loc))
             }
@@ -123,11 +123,9 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
         }
     }
 
-    fun findInput(frequency: Long?) =
-        infos.filtered.find { it.frequency == frequency && !it.output }
+    fun findInput(frequency: Long) = infos.findInput(frequency)
 
-    fun findOutput(frequency: Long?) =
-        infos.filtered.find { it.frequency == frequency && it.output }
+    fun findAnyOutput(frequency: Long) = infos.findAnyOutput(frequency)
 
     fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         var clickRenameButton = false

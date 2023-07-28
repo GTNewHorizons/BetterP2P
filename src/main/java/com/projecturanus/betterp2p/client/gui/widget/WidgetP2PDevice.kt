@@ -86,17 +86,17 @@ class WidgetP2PDevice(private val selectedInfoProperty: KProperty0<InfoWrapper?>
             gui.bindTexture(gui.background)
             if (info.output) {
                 drawTexturedQuad(Tessellator.instance, x.toDouble(), y + 4.0, x + 16.0, y + 20.0,
-                    144.0 / GUI_WIDTH, 200.0 / GUI_TEX_HEIGHT, 160.0 / GUI_WIDTH, 216.0 / GUI_TEX_HEIGHT)
+                    144.0 / GUI_TEX_WIDTH, 200.0 / GUI_TEX_HEIGHT, 160.0 / GUI_TEX_WIDTH, 216.0 / GUI_TEX_HEIGHT)
             } else {
                 drawTexturedQuad(Tessellator.instance, x.toDouble(), y + 4.0, x + 16.0, y + 20.0,
-                    128.0 / GUI_WIDTH, 200.0 / GUI_TEX_HEIGHT, 144.0 / GUI_WIDTH, 216.0 / GUI_TEX_HEIGHT)
+                    128.0 / GUI_TEX_WIDTH, 200.0 / GUI_TEX_HEIGHT, 144.0 / GUI_TEX_WIDTH, 216.0 / GUI_TEX_HEIGHT)
             }
             if (info.error || info.frequency == 0L || !info.hasChannel) {
                 drawTexturedQuad(Tessellator.instance, x + 3.0, y + 20.0, x + 19.0, y + 36.0,
-                    144.0 / GUI_WIDTH, 216.0 / GUI_TEX_HEIGHT, 160.0 / GUI_WIDTH, 232.0 / GUI_TEX_HEIGHT)
+                    144.0 / GUI_TEX_WIDTH, 216.0 / GUI_TEX_HEIGHT, 160.0 / GUI_TEX_WIDTH, 232.0 / GUI_TEX_HEIGHT)
             } else {
                 drawTexturedQuad(Tessellator.instance, x + 3.0, y + 20.0, x + 19.0, y + 36.0,
-                    128.0 / GUI_WIDTH, 216.0 / GUI_TEX_HEIGHT, 144.0 / GUI_WIDTH, 232.0 / GUI_TEX_HEIGHT)
+                    128.0 / GUI_TEX_WIDTH, 216.0 / GUI_TEX_HEIGHT, 144.0 / GUI_TEX_WIDTH, 232.0 / GUI_TEX_HEIGHT)
             }
             // Now draw the stuff that messes up our GL state (aka text)
             val fontRenderer = gui.mc.fontRenderer
