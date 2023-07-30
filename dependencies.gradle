@@ -8,4 +8,5 @@ dependencies {
     compileOnly('net.industrial-craft:industrialcraft-2:2.2.828-experimental:api')
     devOnlyNonPublishable('com.github.GTNewHorizons:OpenComputers:1.9.5-GTNH:dev') {transitive = false}
     compileOnly('pneumaticCraft:PneumaticCraft-1.7.10:1.12.7-152:api') {transitive = false}
+    api('com.github.GTNewHorizons:AE2FluidCraft-Rework:1.1.29-gtnh-pre:dev') {transitive = false}
 }

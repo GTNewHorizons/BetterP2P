@@ -1,6 +1,7 @@
 package com.projecturanus.betterp2p.client.gui
 
-import com.projecturanus.betterp2p.network.NONE_SELECTED
+import com.projecturanus.betterp2p.client.gui.widget.WidgetScrollBar
+import com.projecturanus.betterp2p.network.data.P2PLocation
 import kotlin.reflect.KProperty0
 
 /**
@@ -17,7 +18,7 @@ class InfoList (initList: Collection<InfoWrapper>,
      * The master map, acts as the source of truth for all items
      * in this list.
      */
-    private val masterMap: HashMap<Long, InfoWrapper> = hashMapOf()
+    private val masterMap: HashMap<P2PLocation, InfoWrapper> = hashMapOf()
 
     /**
      * Sorted view of the master map. This is resorted whenever
@@ -39,20 +40,26 @@ class InfoList (initList: Collection<InfoWrapper>,
         get() = search.get()
 
     val selectedInfo: InfoWrapper?
-        get() = masterMap[selectedEntry]
+        get() {
+            return if (selectedEntry == null) {
+                null
+            } else {
+                masterMap[selectedEntry]
+            }
+       }
 
-    var selectedEntry: Long = NONE_SELECTED
+    var selectedEntry: P2PLocation? = null
 
     val size: Int
         get() = masterMap.size
 
     init {
-        initList.forEach { masterMap[it.code] = it }
+        initList.forEach { masterMap[it.loc] = it }
     }
 
     fun resort() {
         sorted.sortBy {
-            if (it.code == selectedEntry) {
+            if (it.loc == selectedEntry) {
                 -2 // Put the selected p2p at the front
                 // Non-Zero frequencies
             } else if (it.frequency != 0L && it.frequency == selectedInfo?.frequency && !it.output) {
@@ -72,7 +79,7 @@ class InfoList (initList: Collection<InfoWrapper>,
     fun refilter() {
         filter.updateFilter(searchStr.lowercase())
         filtered = sorted.filter {
-            if (it.code == selectedEntry) {
+            if (it.loc == selectedEntry) {
                 return@filter true
             }
             for ((f, strs) in filter.activeFilters) {
@@ -83,7 +90,7 @@ class InfoList (initList: Collection<InfoWrapper>,
             true
         }.sortedBy {
             when {
-                it.code == selectedEntry -> Long.MIN_VALUE + 1
+                it.loc == selectedEntry -> Long.MIN_VALUE + 1
                 it.frequency != 0L && it.frequency == selectedInfo?.frequency && !it.output -> Long.MIN_VALUE
                 // Put the same frequency to the front
                 it.frequency != 0.toLong() && it.frequency == selectedInfo?.frequency -> Long.MIN_VALUE + 2
@@ -116,33 +123,31 @@ class InfoList (initList: Collection<InfoWrapper>,
     /**
      * Completely refresh the master list.
      */
-    fun rebuild(updateList: Collection<InfoWrapper>) {
+    fun rebuild(updateList: Collection<InfoWrapper>, scrollbar: WidgetScrollBar, numEntries: Int) {
         masterMap.clear()
-        updateList.forEach { masterMap[it.code] = it }
+        updateList.forEach { masterMap[it.loc] = it }
         sorted.clear()
         sorted.addAll(masterMap.values)
         resort()
         // TODO: Extend the filtering mechanism.
         refilter()
+        scrollbar.setRange(0, masterMap.size.coerceIn(0, (masterMap.size - numEntries).coerceAtLeast(0)), 23)
     }
 
     /**
      * Updates the master list and sends the changes downstream to sorted/filtered.
      */
-    fun update(updateList: Collection<InfoWrapper>) {
-        updateList.forEach { masterMap[it.code] = it }
+    fun update(updateList: Collection<InfoWrapper>, scrollbar: WidgetScrollBar, numEntries: Int) {
+        updateList.forEach { masterMap[it.loc] = it }
         sorted.clear()
         sorted.addAll(masterMap.values)
         resort()
         // TODO: Extend the filtering mechanism.
         refilter()
+        scrollbar.setRange(0, masterMap.size.coerceIn(0, (masterMap.size - numEntries).coerceAtLeast(0)), 23)
     }
 
-    fun select(hashCode: Long) {
-        if (masterMap.containsKey(hashCode)) {
-            selectedEntry = hashCode
-        } else {
-            selectedEntry = NONE_SELECTED
-        }
+    fun select(which: P2PLocation?) {
+        selectedEntry = masterMap.getOrDefault(which, null)?.loc
     }
 }
