@@ -1,22 +1,20 @@
 package com.projecturanus.betterp2p.network.packet
 
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.world.World
-import net.minecraftforge.common.DimensionManager
-
-import com.projecturanus.betterp2p.network.ModNetwork
-import com.projecturanus.betterp2p.network.data.P2PLocation
-import com.projecturanus.betterp2p.network.data.readP2PLocation
-import com.projecturanus.betterp2p.network.data.writeP2PLocation
-
 import appeng.api.networking.IGridHost
 import appeng.api.parts.IPartHost
 import appeng.parts.p2p.PartP2PTunnel
+import com.projecturanus.betterp2p.network.ModNetwork
+import com.projecturanus.betterp2p.network.data.P2PLocation
+import com.projecturanus.betterp2p.network.data.readP2PLocation
 import com.projecturanus.betterp2p.network.data.toLoc
+import com.projecturanus.betterp2p.network.data.writeP2PLocation
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
 import cpw.mods.fml.common.network.simpleimpl.MessageContext
 import io.netty.buffer.ByteBuf
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.world.World
+import net.minecraftforge.common.DimensionManager
 
 /**
  * Client->Server packet for rename operation

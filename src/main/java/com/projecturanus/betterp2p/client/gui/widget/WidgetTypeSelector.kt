@@ -2,9 +2,7 @@ package com.projecturanus.betterp2p.client.gui.widget
 
 import com.projecturanus.betterp2p.client.gui.GuiAdvancedMemoryCard
 import com.projecturanus.betterp2p.client.gui.drawBlockIcon
-import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
-import com.projecturanus.betterp2p.util.p2p.TunnelInfo
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.resources.I18n
 import net.minecraft.init.Blocks

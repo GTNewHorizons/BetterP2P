@@ -1,9 +1,8 @@
 package com.projecturanus.betterp2p
 
-import net.minecraft.item.ItemStack
-import net.minecraft.item.crafting.ShapelessRecipes
-import net.minecraft.util.IIcon
-
+import appeng.api.AEApi
+import appeng.api.definitions.IItemDefinition
+import appeng.parts.p2p.*
 import com.glodblock.github.common.parts.PartFluidP2PInterface
 import com.glodblock.github.loader.ItemAndBlockHolder
 import com.projecturanus.betterp2p.client.render.RenderHandler
@@ -11,23 +10,11 @@ import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard
 import com.projecturanus.betterp2p.network.ServerPlayerDisconnectHandler
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
 import com.projecturanus.betterp2p.util.p2p.TunnelInfo
-
-import appeng.api.AEApi
-import appeng.api.definitions.IItemDefinition
-import appeng.parts.p2p.PartP2PGT5Power
-import appeng.parts.p2p.PartP2PIC2Power
-import appeng.parts.p2p.PartP2PInterface
-import appeng.parts.p2p.PartP2PItems
-import appeng.parts.p2p.PartP2PLight
-import appeng.parts.p2p.PartP2PLiquids
-import appeng.parts.p2p.PartP2POpenComputers
-import appeng.parts.p2p.PartP2PPressure
-import appeng.parts.p2p.PartP2PRFPower
-import appeng.parts.p2p.PartP2PRedstone
-import appeng.parts.p2p.PartP2PTunnel
-import appeng.parts.p2p.PartP2PTunnelME
 import cpw.mods.fml.common.Loader
 import cpw.mods.fml.common.registry.GameRegistry
+import net.minecraft.item.ItemStack
+import net.minecraft.item.crafting.ShapelessRecipes
+import net.minecraft.util.IIcon
 
 /**
  * A proxy for the server

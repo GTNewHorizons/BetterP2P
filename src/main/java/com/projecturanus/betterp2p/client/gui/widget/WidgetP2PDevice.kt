@@ -1,10 +1,10 @@
 package com.projecturanus.betterp2p.client.gui.widget
 
-import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
 import com.projecturanus.betterp2p.client.gui.*
 import com.projecturanus.betterp2p.item.BetterMemoryCardModes
-import com.projecturanus.betterp2p.network.packet.C2STypeChange
 import com.projecturanus.betterp2p.network.ModNetwork
+import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
+import com.projecturanus.betterp2p.network.packet.C2STypeChange
 import com.projecturanus.betterp2p.util.p2p.ClientTunnelInfo
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.Tessellator

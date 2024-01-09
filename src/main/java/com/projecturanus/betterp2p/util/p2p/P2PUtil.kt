@@ -1,9 +1,8 @@
 package com.projecturanus.betterp2p.util.p2p
 
+import appeng.parts.p2p.PartP2PTunnel
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
-
-import appeng.parts.p2p.PartP2PTunnel
 
 var PartP2PTunnel<*>.outputProperty
     get() = isOutput
