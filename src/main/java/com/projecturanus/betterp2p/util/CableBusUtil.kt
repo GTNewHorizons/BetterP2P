@@ -1,16 +1,15 @@
 package com.projecturanus.betterp2p.util
 
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.Vec3
-import net.minecraft.world.IBlockAccess
-
 import appeng.api.parts.IPart
 import appeng.api.parts.IPartHost
 import appeng.api.parts.SelectedPart
 import appeng.parts.AEBasePart
 import appeng.parts.ICableBusContainer
 import appeng.tile.networking.TileCableBus
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.Vec3
+import net.minecraft.world.IBlockAccess
 
 /**
  * @see appeng.block.networking.BlockCableBus.cb

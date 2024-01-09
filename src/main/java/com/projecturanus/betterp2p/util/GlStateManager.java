@@ -9,7 +9,8 @@ import javax.annotation.Nullable;
 import net.minecraft.client.renderer.OpenGlHelper;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.vector.Quaternion;
 
 import cpw.mods.fml.relauncher.Side;

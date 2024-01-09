@@ -1,13 +1,11 @@
 package com.projecturanus.betterp2p.network.data
 
-import net.minecraftforge.common.util.ForgeDirection
-
-import com.projecturanus.betterp2p.util.p2p.getTypeIndex
-import com.projecturanus.betterp2p.util.p2p.hasChannel
-
 import appeng.me.GridNode
 import appeng.parts.p2p.PartP2PTunnel
+import com.projecturanus.betterp2p.util.p2p.getTypeIndex
+import com.projecturanus.betterp2p.util.p2p.hasChannel
 import io.netty.buffer.ByteBuf
+import net.minecraftforge.common.util.ForgeDirection
 
 /**
  * Sent over the network to clients.

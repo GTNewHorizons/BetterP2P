@@ -9,11 +9,7 @@ import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.client.ClientCache
 import com.projecturanus.betterp2p.client.gui.widget.GuiScale
 import com.projecturanus.betterp2p.network.ModNetwork
-import com.projecturanus.betterp2p.network.data.MemoryInfo
-import com.projecturanus.betterp2p.network.data.TUNNEL_ANY
-import com.projecturanus.betterp2p.network.data.readP2PLocation
-import com.projecturanus.betterp2p.network.data.toLoc
-import com.projecturanus.betterp2p.network.data.writeP2PLocation
+import com.projecturanus.betterp2p.network.data.*
 import com.projecturanus.betterp2p.util.getPart
 import com.projecturanus.betterp2p.util.p2p.getTypeIndex
 import cpw.mods.fml.relauncher.Side

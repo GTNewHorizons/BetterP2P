@@ -3,11 +3,10 @@
  */
 package com.projecturanus.betterp2p.network.data
 
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.common.util.ForgeDirection
-
 import appeng.parts.p2p.PartP2PTunnel
 import io.netty.buffer.ByteBuf
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraftforge.common.util.ForgeDirection
 
 /**
  * A simplified version of P2PInfo that holds only location data. This distinction is useful for

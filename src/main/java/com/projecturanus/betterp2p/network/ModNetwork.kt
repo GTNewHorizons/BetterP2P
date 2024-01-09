@@ -1,42 +1,20 @@
 package com.projecturanus.betterp2p.network
 
-import java.util.concurrent.ScheduledThreadPoolExecutor
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.TimeUnit
-import java.util.Collections
-import java.util.UUID
-import java.util.WeakHashMap
 
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-
+import appeng.api.networking.IGrid
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.network.data.GridServerCache
 import com.projecturanus.betterp2p.network.data.MemoryInfo
-import com.projecturanus.betterp2p.network.packet.C2SCloseGui
-import com.projecturanus.betterp2p.network.packet.C2SLinkP2P
-import com.projecturanus.betterp2p.network.packet.C2SRefreshP2PList
-import com.projecturanus.betterp2p.network.packet.C2SRenameP2P
-import com.projecturanus.betterp2p.network.packet.C2STypeChange
-import com.projecturanus.betterp2p.network.packet.C2SUnlinkP2P
-import com.projecturanus.betterp2p.network.packet.C2SUpdateMemoryInfo
-import com.projecturanus.betterp2p.network.packet.ClientOpenGuiHandler
-import com.projecturanus.betterp2p.network.packet.ClientUpdateP2PHandler
-import com.projecturanus.betterp2p.network.packet.S2COpenGui
-import com.projecturanus.betterp2p.network.packet.S2CUpdateP2P
-import com.projecturanus.betterp2p.network.packet.ServerCloseGuiHandler
-import com.projecturanus.betterp2p.network.packet.ServerLinkP2PHandler
-import com.projecturanus.betterp2p.network.packet.ServerRefreshP2PListHandler
-import com.projecturanus.betterp2p.network.packet.ServerRenameP2PTunnel
-import com.projecturanus.betterp2p.network.packet.ServerTypeChangeHandler
-import com.projecturanus.betterp2p.network.packet.ServerUnlinkP2PHandler
-import com.projecturanus.betterp2p.network.packet.ServerUpdateInfoHandler
-
-
-import appeng.api.networking.IGrid
+import com.projecturanus.betterp2p.network.packet.*
 import cpw.mods.fml.common.network.NetworkRegistry
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import cpw.mods.fml.relauncher.Side
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.EntityPlayerMP
+import java.util.*
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * Network cooldown time in milliseconds
