@@ -88,9 +88,9 @@ public class OutlineRenderer {
     public static void renderOutlinesWithFacing(RenderWorldLastEvent evt, EntityPlayer p,
             Collection<Pair<List<Integer>, ForgeDirection>> coordinates, int r, int g, int b) {
 
-        double doubleX = p.lastTickPosX + (p.posX - p.lastTickPosX);
-        double doubleY = p.lastTickPosY + (p.posY - p.lastTickPosY);
-        double doubleZ = p.lastTickPosZ + (p.posZ - p.lastTickPosZ);
+        double doubleX = p.lastTickPosX + (p.posX - p.lastTickPosX) * evt.partialTicks;
+        double doubleY = p.lastTickPosY + (p.posY - p.lastTickPosY) * evt.partialTicks;
+        double doubleZ = p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * evt.partialTicks;
         GlStateManager.pushAttrib();
         GlStateManager.disableDepth();
         GlStateManager.disableTexture2D();
