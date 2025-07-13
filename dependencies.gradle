@@ -9,4 +9,5 @@ dependencies {
     devOnlyNonPublishable('com.github.GTNewHorizons:OpenComputers:1.11.16-GTNH:dev') {transitive = false}
     compileOnly('pneumaticCraft:PneumaticCraft-1.7.10:1.12.7-152:api') {transitive = false}
     api('com.github.GTNewHorizons:AE2FluidCraft-Rework:1.4.99-gtnh:dev') {transitive = false}
+    api('com.github.GTNewHorizons:Baubles-Expanded:2.1.9-GTNH:api')
 }
