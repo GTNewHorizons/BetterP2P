@@ -1,13 +1,13 @@
 // Add your dependencies here
 
 dependencies {
-    api('com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-652-GTNH:dev')
-    api('com.github.GTNewHorizons:Forgelin:1.10.0-GTNH')
+    api('com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-688-GTNH:dev')
+    api('com.github.GTNewHorizons:Forgelin:2.0.3-GTNH')
     api('com.github.GTNewHorizons:BuildCraft:7.1.44:dev')
     // Some optional P2P tunnel support
     compileOnly('net.industrial-craft:industrialcraft-2:2.2.828-experimental:api')
-    devOnlyNonPublishable('com.github.GTNewHorizons:OpenComputers:1.11.16-GTNH:dev') {transitive = false}
+    devOnlyNonPublishable('com.github.GTNewHorizons:OpenComputers:1.11.19-GTNH:dev') {transitive = false}
     compileOnly('pneumaticCraft:PneumaticCraft-1.7.10:1.12.7-152:api') {transitive = false}
-    api('com.github.GTNewHorizons:AE2FluidCraft-Rework:1.4.99-gtnh:dev') {transitive = false}
-    api('com.github.GTNewHorizons:Baubles-Expanded:2.1.9-GTNH:api')
+    api('com.github.GTNewHorizons:AE2FluidCraft-Rework:1.4.114-gtnh:dev') {transitive = false}
+    api('com.github.GTNewHorizons:Baubles-Expanded:2.1.15-GTNH:api')
 }

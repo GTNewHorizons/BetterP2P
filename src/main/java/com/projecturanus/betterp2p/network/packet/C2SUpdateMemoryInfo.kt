@@ -30,7 +30,7 @@ class ServerUpdateInfoHandler : IMessageHandler<C2SUpdateMemoryInfo, IMessage?> 
         val player = ctx.serverHandler.playerEntity
         val stack = player.heldItem
 
-        if (stack.item is ItemAdvancedMemoryCard) {
+        if (stack != null && stack.item is ItemAdvancedMemoryCard) {
             ItemAdvancedMemoryCard.writeInfo(stack, message.info)
         }
 
