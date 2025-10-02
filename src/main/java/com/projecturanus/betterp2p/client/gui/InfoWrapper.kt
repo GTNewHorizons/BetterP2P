@@ -76,13 +76,9 @@ class InfoWrapper(info: P2PInfo) {
         val p2pType: ClientTunnelInfo = BetterP2P.proxy.getP2PFromIndex(info.type) as ClientTunnelInfo
         icon = p2pType.icon()
         overlay = p2pType.stack.iconIndex
-        description = buildString {
-            I18n.format("gui.advanced_memory_card.p2p_status.type", p2pType.dispName)
-            if (output)
-                append(I18n.format("gui.advanced_memory_card.p2p_status.output"))
-            else
-                append(I18n.format("gui.advanced_memory_card.p2p_status.input"))
-        }
+        description = I18n.format("gui.advanced_memory_card.p2p_status.type", p2pType.dispName, 
+                if (output) I18n.format("gui.advanced_memory_card.p2p_status.output") 
+                else I18n.format("gui.advanced_memory_card.p2p_status.input"))
         val online = info.hasChannel
         hoverInfo = mutableListOf(
             "§bP2P - ${p2pType.dispName}",
