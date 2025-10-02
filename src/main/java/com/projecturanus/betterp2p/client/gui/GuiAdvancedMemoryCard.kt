@@ -415,7 +415,7 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
         drawDefaultBackground()
         drawBackground()
         // Draw the stuff that resets GL state first
-        fontRendererObj.drawString(I18n.format("item.advanced_memory_card.name"), guiLeft + tableX, guiTop + 6, 0)
+        fontRendererObj.drawString(I18n.format("item.advanced_memory_card.name.gui"), guiLeft + tableX, guiTop + 6, 0)
         searchBar.drawTextBox()
         buttonList.forEach { it as WidgetButton
             it.draw(mc, mouseX, mouseY, partialTicks)

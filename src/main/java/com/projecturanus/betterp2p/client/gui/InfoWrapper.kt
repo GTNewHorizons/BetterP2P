@@ -77,9 +77,9 @@ class InfoWrapper(info: P2PInfo) {
         icon = p2pType.icon()
         overlay = p2pType.stack.iconIndex
         description = buildString {
-            append("Type: ")
+            append(I18n.format("gui.advanced_memory_card.p2p_status.pre1"))
             append(p2pType.dispName)
-            append(" - ")
+            append(I18n.format("gui.advanced_memory_card.p2p_status.pre2"))
             if (output)
                 append(I18n.format("gui.advanced_memory_card.p2p_status.output"))
             else
