@@ -223,7 +223,7 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
         }
         var converted = false
         // Change to a static P2P type
-        if (newType.clazz.superclass == PartP2PTunnelStatic::class.java) {
+        if (PartP2PTunnelStatic::class.java.isAssignableFrom(newType.clazz)) {
             for ((i, stack) in player.inventory.mainInventory.withIndex()) {
                 if (stack?.isItemEqual(newType.stack) == true) {
                     player.inventory.decrStackSize(i, 1)
