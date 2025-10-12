@@ -1,6 +1,8 @@
 package com.projecturanus.betterp2p.network.data
 
 import appeng.api.config.SecurityPermissions
+import appeng.api.implementations.items.IMemoryCard
+import appeng.api.implementations.items.MemoryCardMessages
 import appeng.api.networking.IGrid
 import appeng.api.networking.security.ISecurityGrid
 import appeng.api.parts.IPart
@@ -21,7 +23,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.ChatComponentTranslation
-import net.minecraftforge.common.util.ForgeDirection
 
 /**
  * When the player uses the adv memory card, this is cached on the server side
@@ -178,32 +179,34 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
      * AE2 trigger the Grid refresh for us (though we need to update the tunnels ourselves)
      */
     private fun updateP2P(key: P2PLocation, tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, name: String): PartP2PTunnel<*> {
-        val side = tunnel.side
         val data = NBTTagCompound()
-
-        tunnel.host.removePart(side, true)
-
         val p2pItem: ItemStack = tunnel.getItemStack(PartItemStack.Wrench)
-
-
         p2pItem.writeToNBT(data)
         data.setLong("freq", frequency)
+        if (name.isNotBlank()) {
+            val dsp = NBTTagCompound()
+            dsp.setString("Name", name)
+            data.setTag("display", dsp)
+        }
 
-        val newType = ItemStack.loadItemStackFromNBT(data)
-        val dir: ForgeDirection = tunnel.host?.addPart(newType, side, player) ?: throw RuntimeException("Cannot bind")
-        val newBus: IPart = tunnel.host.getPart(dir)
+        val newBus: IPart? = tunnel.applyMemoryCard(player, object : IMemoryCard {
+            override fun getData(ist: ItemStack?): NBTTagCompound {
+                return data
+            }
+
+            override fun getSettingsName(ist: ItemStack?): String {
+                return ""
+            }
+
+            override fun setMemoryCardContents(p0: ItemStack?, p1: String?, p2: NBTTagCompound?) {}
+
+            override fun notifyUser(player: EntityPlayer?, msg: MemoryCardMessages?) {}
+
+            override fun isOutputData(): Boolean {
+                return output
+            }
+        }, p2pItem)
         if (newBus is PartP2PTunnel<*>) {
-            newBus.outputProperty = output
-            if (!name.isBlank()) {
-                newBus.customName = name
-            }
-            try {
-                val p2p = newBus.proxy.p2P
-                p2p.updateFreq(newBus, frequency)
-            } catch (e: GridAccessException) {
-                // :P
-            }
-            newBus.onTunnelNetworkChange()
             markDirty(key, newBus)
             return newBus
         } else {
