@@ -154,13 +154,6 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
         val inputResult: PartP2PTunnel<*> = updateP2P(inputIndex, input, frequency, false, input.customName)
         val outputResult: PartP2PTunnel<*> = updateP2P(outputIndex, output, frequency, true, input.customName)
 
-        // Special case for interfaces
-        if (input is IInterfaceHost && output is IInterfaceHost) {
-            val drops = mutableListOf<ItemStack>()
-            handleInterface(input, output, inputResult as IInterfaceHost, outputResult as IInterfaceHost, drops)
-            Platform.spawnDrops(player.worldObj, output.location.x, output.location.y, output.location.z, drops)
-        }
-
         return inputResult to outputResult
     }
 
@@ -306,47 +299,5 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
             // :P
         }
         return false
-    }
-
-    /**
-     * Handles a p2p interface/dual interface case.
-     */
-    private fun handleInterface(oldIn: IInterfaceHost, oldOut: IInterfaceHost,
-                                newIn: IInterfaceHost, newOut: IInterfaceHost,
-                                drops: MutableList<ItemStack>) {
-        // For input and output, retain upgrades, items, and settings.
-        val upgradesIn = oldIn.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
-        upgradesIn.forEachIndexed { index, stack ->
-            (newIn.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
-        }
-        val upgradesOut = oldOut.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory
-        upgradesOut.forEachIndexed { index, stack ->
-            (newOut.interfaceDuality.getInventoryByName("upgrades") as UpgradeInventory).setInventorySlotContents(index, stack)
-        }
-        val itemsIn = oldIn.interfaceDuality.storage as AppEngInternalInventory
-        itemsIn.forEachIndexed { index, stack ->
-            (newIn.interfaceDuality.storage as AppEngInternalInventory).setInventorySlotContents(index, stack)
-        }
-        val itemsOut = oldOut.interfaceDuality.storage as AppEngInternalInventory
-        itemsOut.forEachIndexed { index, stack ->
-            (newOut.interfaceDuality.storage as AppEngInternalInventory).setInventorySlotContents(index, stack)
-        }
-        val settingsIn = oldIn.interfaceDuality.configManager
-        settingsIn.settings.forEach {
-            newIn.configManager.putSetting(it, settingsIn.getSetting(it))
-        }
-        val settingsOut = oldOut.interfaceDuality.configManager
-        settingsOut.settings.forEach {
-            newOut.configManager.putSetting(it, settingsOut.getSetting(it))
-        }
-
-        // For input, just copy the patterns over
-        val patternsIn = oldIn.interfaceDuality.patterns as AppEngInternalInventory
-        patternsIn.forEachIndexed { index, stack ->
-            (newIn.interfaceDuality.patterns as AppEngInternalInventory).setInventorySlotContents(index, stack)
-        }
-        // For output, drop items
-        val patternsOut = oldOut.interfaceDuality.patterns as AppEngInternalInventory
-        drops.addAll(patternsOut)
     }
 }
