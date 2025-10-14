@@ -23,6 +23,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.ChatComponentTranslation
+import net.minecraftforge.common.util.Constants.NBT
 
 /**
  * When the player uses the adv memory card, this is cached on the server side
@@ -134,27 +135,39 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
             return null
         }
 
-        var frequency = input.frequency
-        val cache = input.proxy.p2P
-
-        // Generate a new frequency if needed
-        if (input.frequency == 0L || input.isOutput) {
-            frequency = System.currentTimeMillis()
-        }
-
-        // If tunnel was already bound, unbind that one
-        if (cache.getInput(frequency) != null) {
-            val originalInput = cache.getInput(frequency)
-            if (originalInput != input) {
-                updateP2P(originalInput.toLoc(), originalInput, frequency, true, input.customName)
-            }
-        }
-
         // Perform the link
-        val inputResult: PartP2PTunnel<*> = updateP2P(inputIndex, input, frequency, false, input.customName)
-        val outputResult: PartP2PTunnel<*> = updateP2P(outputIndex, output, frequency, true, input.customName)
+        val memoryCard: IMemoryCard = object : IMemoryCard {
+            private var data :NBTTagCompound = NBTTagCompound()
+            private var settingsName : String = ""
 
-        return inputResult to outputResult
+            override fun getData(ist: ItemStack?): NBTTagCompound {
+                return this.data
+            }
+
+            override fun getSettingsName(ist: ItemStack?): String {
+                return ""
+            }
+
+            override fun setMemoryCardContents(p0: ItemStack?, p1: String?, p2: NBTTagCompound?) {
+                this.data = p2 ?: NBTTagCompound()
+                this.settingsName = p1 ?: ""
+            }
+
+            override fun notifyUser(player: EntityPlayer?, msg: MemoryCardMessages?) {}
+        }
+
+        input.convertToInput()
+        input.saveInputToMemoryCard(player, memoryCard, null)
+        markDirty(inputIndex, input)
+
+        val outputResult: PartP2PTunnel<*>? = output.applyMemoryCard(player, memoryCard, null)
+        if (outputResult != null) {
+            markDirty(outputIndex, outputResult)
+        } else {
+            throw IllegalStateException("Cannot bind")
+        }
+
+        return input to outputResult
     }
 
     fun unlinkP2P(p2pIndex: P2PLocation): PartP2PTunnel<*>? {
@@ -164,47 +177,9 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
             return tunnel
         }
 
-        return updateP2P(p2pIndex, tunnel, 0L, false, tunnel.customName)
-    }
-
-    /**
-     * Sets the p2p tunnel to the frequency, output, and custom name. Removes the old one and replaces it, which lets
-     * AE2 trigger the Grid refresh for us (though we need to update the tunnels ourselves)
-     */
-    private fun updateP2P(key: P2PLocation, tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, name: String): PartP2PTunnel<*> {
-        val data = NBTTagCompound()
-        val p2pItem: ItemStack = tunnel.getItemStack(PartItemStack.Wrench)
-        p2pItem.writeToNBT(data)
-        data.setLong("freq", frequency)
-        if (name.isNotBlank()) {
-            val dsp = NBTTagCompound()
-            dsp.setString("Name", name)
-            data.setTag("display", dsp)
-        }
-
-        val newBus: IPart? = tunnel.applyMemoryCard(player, object : IMemoryCard {
-            override fun getData(ist: ItemStack?): NBTTagCompound {
-                return data
-            }
-
-            override fun getSettingsName(ist: ItemStack?): String {
-                return ""
-            }
-
-            override fun setMemoryCardContents(p0: ItemStack?, p1: String?, p2: NBTTagCompound?) {}
-
-            override fun notifyUser(player: EntityPlayer?, msg: MemoryCardMessages?) {}
-
-            override fun isOutputData(): Boolean {
-                return output
-            }
-        }, p2pItem)
-        if (newBus is PartP2PTunnel<*>) {
-            markDirty(key, newBus)
-            return newBus
-        } else {
-            throw IllegalStateException("Cannot bind")
-        }
+        tunnel.unbind()
+        markDirty(p2pIndex, tunnel)
+        return tunnel
     }
 
     /**
