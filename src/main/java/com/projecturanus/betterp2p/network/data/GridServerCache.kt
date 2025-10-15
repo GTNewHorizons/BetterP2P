@@ -1,19 +1,12 @@
 package com.projecturanus.betterp2p.network.data
 
 import appeng.api.config.SecurityPermissions
-import appeng.api.implementations.items.IMemoryCard
-import appeng.api.implementations.items.MemoryCardMessages
 import appeng.api.networking.IGrid
 import appeng.api.networking.security.ISecurityGrid
-import appeng.api.parts.IPart
-import appeng.api.parts.PartItemStack
-import appeng.helpers.IInterfaceHost
 import appeng.me.GridAccessException
 import appeng.me.cache.P2PCache
-import appeng.parts.automation.UpgradeInventory
 import appeng.parts.p2p.PartP2PTunnel
 import appeng.parts.p2p.PartP2PTunnelStatic
-import appeng.tile.inventory.AppEngInternalInventory
 import appeng.util.Platform
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.util.p2p.TunnelInfo
@@ -23,7 +16,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.ChatComponentTranslation
-import net.minecraftforge.common.util.Constants.NBT
 
 /**
  * When the player uses the adv memory card, this is cached on the server side
@@ -136,50 +128,34 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
         }
 
         // Perform the link
-        val memoryCard: IMemoryCard = object : IMemoryCard {
-            private var data :NBTTagCompound = NBTTagCompound()
-            private var settingsName : String = ""
+        val memoryCardData : NBTTagCompound
 
-            override fun getData(ist: ItemStack?): NBTTagCompound {
-                return this.data
-            }
-
-            override fun getSettingsName(ist: ItemStack?): String {
-                return ""
-            }
-
-            override fun setMemoryCardContents(p0: ItemStack?, p1: String?, p2: NBTTagCompound?) {
-                this.data = p2 ?: NBTTagCompound()
-                this.settingsName = p1 ?: ""
-            }
-
-            override fun notifyUser(player: EntityPlayer?, msg: MemoryCardMessages?) {}
+        val inputResult = input.convertToInput(player, null)
+        if(inputResult != null) {
+            memoryCardData = inputResult.memoryCardData
+            markDirty(inputIndex, inputResult)
+        } else {
+            throw IllegalStateException("Cannot bind")
         }
-
-        input.convertToInput()
-        input.saveInputToMemoryCard(player, memoryCard, null)
-        markDirty(inputIndex, input)
-
-        val outputResult: PartP2PTunnel<*>? = output.applyMemoryCard(player, memoryCard, null)
+        val newType = ItemStack.loadItemStackFromNBT(memoryCardData)
+        val freq = memoryCardData.getLong("freq")
+        val outputResult = output.convertToOutput(player, newType, freq)
         if (outputResult != null) {
             markDirty(outputIndex, outputResult)
         } else {
             throw IllegalStateException("Cannot bind")
         }
 
-        return input to outputResult
+        return inputResult to outputResult
     }
 
     fun unlinkP2P(p2pIndex: P2PLocation): PartP2PTunnel<*>? {
         val tunnel = listP2P[p2pIndex] ?: return null
-        val oldFreq = tunnel.frequency
-        if (oldFreq == 0L) {
-            return tunnel
+        val newTunnel = tunnel.unbind(player)
+        if(newTunnel != tunnel) {
+            markDirty(p2pIndex, newTunnel)
         }
-
-        tunnel.unbind()
-        markDirty(p2pIndex, tunnel)
-        return tunnel
+        return newTunnel
     }
 
     /**
