@@ -6,6 +6,7 @@ import appeng.api.networking.security.ISecurityGrid
 import appeng.me.GridAccessException
 import appeng.me.cache.P2PCache
 import appeng.parts.p2p.PartP2PTunnel
+import appeng.parts.p2p.PartP2PTunnelNormal
 import appeng.parts.p2p.PartP2PTunnelStatic
 import appeng.util.Platform
 import com.projecturanus.betterp2p.BetterP2P
@@ -16,6 +17,8 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.ChatComponentTranslation
+import net.minecraftforge.common.util.ForgeDirection
+import java.util.stream.Collectors
 
 /**
  * When the player uses the adv memory card, this is cached on the server side
@@ -166,30 +169,53 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
             player.addChatMessage(ChatComponentTranslation("gui.advanced_memory_card.error.same_type"))
             return null
         }
-        // Change to a static P2P type = require p2p in inventory
-        if (newType.clazz.superclass == PartP2PTunnelStatic::class.java) {
-            var canConvert = false
+        var converted = false
+        // Change to a static P2P type
+        if (PartP2PTunnelStatic::class.java.isAssignableFrom(newType.clazz)) {
             for ((i, stack) in player.inventory.mainInventory.withIndex()) {
                 if (stack?.isItemEqual(newType.stack) == true) {
                     player.inventory.decrStackSize(i, 1)
-                    canConvert = true
+                    converted = true
                     break
                 }
             }
-            if (!canConvert) {
+            if (!converted) {
                 player.addChatMessage(ChatComponentTranslation("gui.advanced_memory_card.error.missing_items", 1, newType.stack.displayName))
                 return null
             }
         }
-        // Change from a static P2P type = give p2p back to the player
+        // Change from a static P2P type
         if (tunnel is PartP2PTunnelStatic<*>) {
+            val attunables = BetterP2P.proxy.getP2PTypeList().stream()
+                .filter{e -> PartP2PTunnelNormal::class.java.isAssignableFrom(e.clazz)}
+                // move exact type to the front so we check for it first
+                .sorted { o1, o2 -> if(o1.equals(newType)) -1 else if(o2.equals(newType)) 1 else 0 }
+                .collect(Collectors.toList())
+            outer@ for (attunable in attunables) {
+                for ((i, stack) in player.inventory.mainInventory.withIndex()) {
+                    if (stack?.isItemEqual(attunable.stack) == true) {
+                        player.inventory.decrStackSize(i, 1)
+                        converted = true
+                        break@outer
+                    }
+                }
+            }
+            if (!converted) {
+                player.addChatMessage(ChatComponentTranslation("gui.advanced_memory_card.error.missing_items", 1, newType.stack.displayName))
+                return null
+            }
+        }
+
+        // handle drops
+        if (converted) {
             val drop = ItemStack.copyItemStack(tunnel.itemStack)
             drop.stackSize = 1
-            if (!player.inventory.addItemStackToInventory(drop)) {
-                val drops = mutableListOf<ItemStack>(drop)
-                tunnel.getDrops(drops, false)
-                Platform.spawnDrops(player.worldObj, player.serverPosX, player.serverPosY, player.serverPosZ, drops)
+            val drops = mutableListOf<ItemStack>(drop)
+            tunnel.getDrops(drops, false)
+            for (j in drops) {
+                player.inventory.addItemStackToInventory(j)
             }
+            Platform.spawnDrops(player.worldObj, player.posX.toInt(), player.posY.toInt(), player.posZ.toInt(), drops)
         }
 
         val host = tunnel.host
