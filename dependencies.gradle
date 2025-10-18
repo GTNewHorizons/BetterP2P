@@ -1,7 +1,7 @@
 // Add your dependencies here
 
 dependencies {
-    api('com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-714-GTNH:dev')
+    api('com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-716-GTNH:dev')
     api('com.github.GTNewHorizons:Forgelin:2.0.3-GTNH')
     api('com.github.GTNewHorizons:BuildCraft:7.1.45:dev')
     // Some optional P2P tunnel support
