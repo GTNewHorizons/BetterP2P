@@ -49,7 +49,7 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
             dirtyP2P.clear()
             grid.machinesClasses.forEach {
                 // Find all P2P tunnels...
-                if (it.superclass.superclass == PartP2PTunnel::class.java &&
+                if (PartP2PTunnel::class.java.isAssignableFrom(it) &&
                         (type == TUNNEL_ANY || BetterP2P.proxy.getP2PFromIndex(type)?.clazz == it)) {
                     grid.getMachines(it).forEach { gridNode ->
                         val p2p = gridNode.machine as PartP2PTunnel<*>
@@ -251,7 +251,7 @@ class GridServerCache(private val grid: IGrid, val player: EntityPlayer, var typ
             }
 
             val outputs = tunnel.outputs.toMutableList()
-            if (newType.clazz.superclass == PartP2PTunnelStatic::class.java) {
+            if (PartP2PTunnelStatic::class.java.isAssignableFrom(newType.clazz)) {
                 val amt = outputs.size + 1
                 var hasItems = 0
                 for (stack in player.inventory.mainInventory) {
