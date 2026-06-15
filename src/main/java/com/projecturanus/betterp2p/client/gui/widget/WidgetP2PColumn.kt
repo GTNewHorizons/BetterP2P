@@ -173,7 +173,8 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
                     it.y + 1,
                     it.x + 50 + 160,
                     it.y + 1 + 12,
-                    ColorUtils.searchboxFocused.color)
+                    ColorUtils.searchboxFocused.color
+                )
             }
         }
     }
