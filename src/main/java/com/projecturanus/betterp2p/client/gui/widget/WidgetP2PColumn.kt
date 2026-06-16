@@ -1,6 +1,6 @@
 package com.projecturanus.betterp2p.client.gui.widget
 
-import appeng.core.localization.GuiColors
+import appeng.core.localization.ColorUtils
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.client.gui.GuiAdvancedMemoryCard
 import com.projecturanus.betterp2p.client.gui.InfoList
@@ -173,7 +173,8 @@ class WidgetP2PColumn(private val gui: GuiAdvancedMemoryCard,
                     it.y + 1,
                     it.x + 50 + 160,
                     it.y + 1 + 12,
-                    GuiColors.SearchboxFocused.color)
+                    ColorUtils.searchboxFocused.color
+                )
             }
         }
     }
