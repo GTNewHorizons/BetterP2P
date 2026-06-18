@@ -465,19 +465,22 @@ class GuiAdvancedMemoryCard(msg: S2COpenGui) : GuiScreen(), TextureBound {
     }
 
     private fun refreshOverlay() {
-        if (selectedInfo == null) {
+        val playerDimension = mc.thePlayer.dimension
+        val selectedLoc = selectedInfo?.loc
+        if (selectedLoc == null || selectedLoc.dim != playerDimension) {
             ClientCache.selectedPosition = null
             ClientCache.selectedFacing = null
         }
         else {
-            ClientCache.selectedPosition = arrayListOf(selectedInfo?.loc?.x, selectedInfo?.loc?.y, selectedInfo?.loc?.z)
-            ClientCache.selectedFacing = selectedInfo?.loc?.facing
+            ClientCache.selectedPosition = arrayListOf(selectedLoc.x, selectedLoc.y, selectedLoc.z)
+            ClientCache.selectedFacing = selectedLoc.facing
         }
         ClientCache.positions.clear()
+        ClientCache.overlayDimension = playerDimension
         ClientCache.positions.addAll(infos.sorted.filter {
             it.frequency == selectedInfo?.frequency &&
             it != selectedInfo &&
-            it.loc.dim == mc.thePlayer.dimension
+            it.loc.dim == playerDimension
         }.map { arrayListOf(it.loc.x, it.loc.y, it.loc.z) to it.loc.facing })
     }
 
