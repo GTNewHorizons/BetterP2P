@@ -7,6 +7,7 @@ import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.SidedProxy
 import cpw.mods.fml.common.event.FMLPostInitializationEvent
 import cpw.mods.fml.common.event.FMLPreInitializationEvent
+import cpw.mods.fml.common.event.FMLServerStartingEvent
 import cpw.mods.fml.common.event.FMLServerStoppedEvent
 import cpw.mods.fml.common.registry.GameRegistry
 import net.minecraftforge.common.config.Configuration
@@ -35,6 +36,11 @@ object BetterP2P {
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
         proxy.postInit()
+    }
+
+    @Mod.EventHandler
+    fun onServerStarting(event: FMLServerStartingEvent) {
+        ModNetwork.start()
     }
 
     @Mod.EventHandler
