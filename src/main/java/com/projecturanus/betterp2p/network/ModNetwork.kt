@@ -44,13 +44,6 @@ object ModNetwork {
         channel.registerMessage(ServerRefreshP2PListHandler::class.java, C2SRefreshP2PList::class.java, id++, Side.SERVER)
         channel.registerMessage(ServerUnlinkP2PHandler::class.java, C2SUnlinkP2P::class.java, id++, Side.SERVER)
         channel.registerMessage(ServerTypeChangeHandler::class.java, C2STypeChange::class.java, id, Side.SERVER)
-        networkWorker = ScheduledThreadPoolExecutor(1, ThreadFactory {
-            val th = Thread(it)
-            th.name = "BetterP2P-NetworkWorker"
-            th.isDaemon = true
-            th.priority = Thread.MIN_PRIORITY
-            th
-        })
     }
 
     /**
@@ -113,6 +106,16 @@ object ModNetwork {
 
     fun removeConnection(player: EntityPlayer) {
         playerState.remove(player.uniqueID)
+    }
+
+    fun start() {
+        networkWorker = ScheduledThreadPoolExecutor(1, ThreadFactory {
+            val th = Thread(it)
+            th.name = "BetterP2P-NetworkWorker"
+            th.isDaemon = true
+            th.priority = Thread.MIN_PRIORITY
+            th
+        })
     }
 
     fun stop() {
