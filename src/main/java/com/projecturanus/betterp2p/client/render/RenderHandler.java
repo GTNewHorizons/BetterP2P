@@ -22,8 +22,12 @@ public class RenderHandler {
     public void renderOverlays(RenderWorldLastEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         if (player.getHeldItem() != null && player.getHeldItem().getItem() == ItemAdvancedMemoryCard.INSTANCE) {
-            if (!ClientCache.INSTANCE.getPositions().isEmpty() || ClientCache.INSTANCE.getSelectedPosition() != null) {
-                if (ClientCache.INSTANCE.getSelectedPosition() != null) {
+            int playerDimension = player.dimension;
+            boolean isCurrentDimension = ClientCache.INSTANCE.getOverlayDimension() == playerDimension;
+            boolean hasPositions = !ClientCache.INSTANCE.getPositions().isEmpty() && isCurrentDimension;
+            boolean hasSelectedPosition = ClientCache.INSTANCE.getSelectedPosition() != null && isCurrentDimension;
+            if (hasPositions || hasSelectedPosition) {
+                if (hasSelectedPosition) {
                     List<Pair<List<Integer>, ForgeDirection>> tmp = new ArrayList<>();
                     tmp.add(
                             new Pair<>(
@@ -31,8 +35,15 @@ public class RenderHandler {
                                     ClientCache.INSTANCE.getSelectedFacing()));
                     OutlineRenderer.renderOutlinesWithFacing(event, player, tmp, 0x45, 0xDA, 0x75);
                 }
-                OutlineRenderer
-                        .renderOutlinesWithFacing(event, player, ClientCache.INSTANCE.getPositions(), 0x66, 0xCC, 0xFF);
+                if (hasPositions) {
+                    OutlineRenderer.renderOutlinesWithFacing(
+                            event,
+                            player,
+                            ClientCache.INSTANCE.getPositions(),
+                            0x66,
+                            0xCC,
+                            0xFF);
+                }
             }
         }
     }
