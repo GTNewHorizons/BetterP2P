@@ -58,7 +58,7 @@ class ServerRenameP2PTunnel : IMessageHandler<C2SRenameP2P, IMessage?> {
 
             if (partTunnel is PartP2PTunnel<*>) {
                 partTunnel.customName = message.name
-                val input: PartP2PTunnel<*> = if (partTunnel.isOutput) {
+                val input: PartP2PTunnel<*> = if (partTunnel.isOutput && partTunnel.input != null) {
                     partTunnel.input
                 } else {
                     partTunnel
