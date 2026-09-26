@@ -88,6 +88,10 @@ open class CommonProxy {
             def = partDefs.p2PTunnelMEInterface(),
             type = typeId++,
             classType = PartP2PInterface::class.java)
+        registerTunnel(
+            def = partDefs.p2PTunnelSound(),
+            type = typeId++,
+            classType = PartP2PSound::class.java)
         if (Loader.isModLoaded("ae2fc")) {
             val item = ItemAndBlockHolder.FLUID_INTERFACE_P2P
             if (item != null) {
@@ -193,6 +197,11 @@ class ClientProxy: CommonProxy() {
             type = typeId++,
             classType = PartP2PInterface::class.java,
             icon = { PartP2PInterface(it).typeTexture })
+        registerTunnel(
+            def = partDefs.p2PTunnelSound(),
+            type = typeId++,
+            classType = PartP2PSound::class.java,
+            icon = { PartP2PSound(it).typeTexture })
         if (Loader.isModLoaded("ae2fc")) {
             val item = ItemAndBlockHolder.FLUID_INTERFACE_P2P
             if (item != null) {
